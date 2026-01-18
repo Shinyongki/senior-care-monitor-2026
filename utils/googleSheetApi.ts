@@ -1,38 +1,62 @@
+import { FormDataState, Hypothesis } from '../types';
 
-import { FormDataState } from '../types';
-
-export const sendToGoogleSheet = async (scriptUrl: string, data: FormDataState) => {
+export const sendToGoogleSheet = async (scriptUrl: string, data: FormDataState, extraData?: { hypotheses?: Hypothesis[] }) => {
   if (!scriptUrl) return { success: false, message: 'API URL이 설정되지 않았습니다.' };
 
   try {
+    const isPhoneMode = data.mon_method === '유선(매월)';
+    const isVisitMode = data.mon_method === '1차 대면';
+
+    // Map Korean Mode to Apps Script English Codes
+    const modeMap: Record<string, string> = {
+      '온라인설문': 'online',
+      '유선(매월)': 'phone',
+      '1차 대면': 'visit',
+      '2차 대면': 'second-visit'
+    };
+    const mappedMode = modeMap[data.mon_method] || 'other';
+
     // 1. Flatten and Format Data for Spreadsheet
-    // We convert complex objects/arrays into strings for cleaner sheet cells
     const payload = {
       // Meta Data
       Timestamp: new Date().toLocaleString('ko-KR'),
-      
+
       // Basic Info
       Survey_Date: data.survey_date,
       Author: data.author,
       Region: data.region,
       Agency: data.agency,
-      Mode: data.mon_method,
+      Mode: mappedMode, // Send the mapped English code
       Service_Type: data.service_type,
-      
+
       // Target Info
       Name: data.name,
       Gender: data.gender,
       Birth_Year: data.birth_year,
+      Birth_Month: data.birth_month,
+      Birth_Day: data.birth_day,
       Age_Group: data.age_group,
 
-      // Phone Mode Data
-      Satisfaction: data.satisfaction,
-      Service_Items: data.service_items.join(', '), // Array -> String
-      Visit_Freq: data.visit_count,
-      Call_Freq: data.call_count,
-      Phone_Risk_Summary: data.safety_trend, // Rename for clarity
-      Phone_Notes: data.special_notes,
-      Phone_Indicators_Json: JSON.stringify(data.phone_indicators), // Keep raw data just in case
+      // Phone Mode Data (Sent ONLY in Phone Mode)
+      Satisfaction: isPhoneMode ? data.satisfaction : '',
+      Service_Items: isPhoneMode ? data.service_items.join(', ') : '',
+      Visit_Freq: isPhoneMode ? data.visit_count : '',
+      Call_Freq: isPhoneMode ? data.call_count : '',
+
+      // Individual Phone Indicators
+      Gen_Stability: isPhoneMode ? (data.phone_indicators?.['gen_stability'] || '') : '',
+      Gen_Loneliness: isPhoneMode ? (data.phone_indicators?.['gen_loneliness'] || '') : '',
+      Gen_Safety: isPhoneMode ? (data.phone_indicators?.['gen_safety'] || '') : '',
+      Hosp_Independence: isPhoneMode ? (data.phone_indicators?.['hosp_indep'] || '') : '',
+      Hosp_Anxiety: isPhoneMode ? (data.phone_indicators?.['hosp_anxiety'] || '') : '',
+      Hosp_Satisfaction: isPhoneMode ? (data.phone_indicators?.['hosp_sat'] || '') : '',
+      Spec_Emotion: isPhoneMode ? (data.phone_indicators?.['spec_emotion'] || '') : '',
+      Spec_Social: isPhoneMode ? (data.phone_indicators?.['spec_social'] || '') : '',
+      Spec_Satisfaction: isPhoneMode ? (data.phone_indicators?.['spec_sat'] || '') : '',
+
+      Phone_Risk_Summary: isPhoneMode ? data.safety_trend : '',
+      Phone_Notes: isPhoneMode ? data.special_notes : '',
+      Phone_Indicators_Json: isPhoneMode ? JSON.stringify(data.phone_indicators) : '',
 
       // Visit Mode Data
       Env_Risks: data.env_check.join(', '),
@@ -40,7 +64,11 @@ export const sendToGoogleSheet = async (scriptUrl: string, data: FormDataState) 
       Body_Status: data.body_status,
       Visit_Grade: data.final_grade,
       Visit_Action_Memo: data.action_memo,
-      Visit_Indicators_Json: JSON.stringify(data.visit_indicators),
+      // Include Hypotheses in Visit Indicators JSON if available
+      Visit_Indicators_Json: JSON.stringify({
+        indicators: data.visit_indicators,
+        hypotheses: extraData?.hypotheses || []
+      }),
 
       // 2nd Visit Data
       Visit2_Reason: data.visit2_reason,
@@ -57,14 +85,15 @@ export const sendToGoogleSheet = async (scriptUrl: string, data: FormDataState) 
       Outdoor_Freq: data.outdoor_frequency,
       Visited_Places: data.visited_places.join(', '),
       Elder_Opinion: data.online_opinion,
+
+      // Risk Target Flag
+      Is_RiskTarget: data.is_risk_target ? '예' : '',
     };
 
     // 2. Send Request
-    // Note: mode 'no-cors' is used because GAS web apps don't return standard CORS headers easily
-    // We assume success if the request is sent without network error.
     await fetch(scriptUrl, {
       method: 'POST',
-      mode: 'no-cors', 
+      mode: 'no-cors',
       headers: {
         'Content-Type': 'application/json',
       },
@@ -76,5 +105,76 @@ export const sendToGoogleSheet = async (scriptUrl: string, data: FormDataState) 
   } catch (error) {
     console.error('Sheet Sync Error:', error);
     return { success: false, message: '데이터 전송 중 오류가 발생했습니다.' };
+  }
+};
+
+// 시트 데이터 조회 (GET 요청)
+export interface SheetRow {
+  rowNumber: number;
+  저장시각?: string;
+  조사일자?: string;
+  담당자?: string;
+  시군?: string;
+  수행기관?: string;
+  모니터링방법?: string;
+  서비스유형?: string;
+  대상자명?: string;
+  성별?: string;
+  만족도?: string;
+  안전동향?: string;
+  특이사항?: string;
+  수행기관답변?: string;
+  [key: string]: string | number | undefined;
+}
+
+export const fetchSheetData = async (scriptUrl: string): Promise<{ success: boolean; data?: SheetRow[]; message?: string }> => {
+  if (!scriptUrl) return { success: false, message: 'API URL이 설정되지 않았습니다.' };
+
+  try {
+    const response = await fetch(scriptUrl, {
+      method: 'GET',
+      mode: 'cors',
+    });
+
+    const result = await response.json();
+
+    if (result.success) {
+      return { success: true, data: result.data };
+    } else {
+      return { success: false, message: result.error || '데이터 조회 실패' };
+    }
+  } catch (error) {
+    console.error('Sheet Fetch Error:', error);
+    return { success: false, message: '데이터 조회 중 오류가 발생했습니다.' };
+  }
+};
+
+// 수행기관 답변 업데이트 (POST 요청)
+export const updateAgencyResponse = async (
+  scriptUrl: string,
+  rowNumber: number,
+  response: string
+): Promise<{ success: boolean; message: string }> => {
+  if (!scriptUrl) return { success: false, message: 'API URL이 설정되지 않았습니다.' };
+
+  try {
+    await fetch(scriptUrl, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        action: 'updateResponse',
+        rowNumber: rowNumber,
+        response: response,
+      }),
+    });
+
+    return { success: true, message: '수행기관 답변이 저장되었습니다.' };
+
+  } catch (error) {
+    console.error('Response Update Error:', error);
+    return { success: false, message: '답변 저장 중 오류가 발생했습니다.' };
   }
 };

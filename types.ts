@@ -1,5 +1,5 @@
 
-export type MonitoringMode = '유선(매월)' | '온라인설문' | '1차 대면' | '2차 대면';
+export type MonitoringMode = '유선(매월)' | '온라인설문' | '1차 대면' | '2차 대면' | '답변관리';
 export type ServiceType = '일반 서비스' | '퇴원환자 단기 집중' | '특화서비스';
 
 export interface AgencyMap {
@@ -27,8 +27,8 @@ export interface RiskTarget {
 export interface PhoneCallRecord {
   id: number;
   name: string;
-  gender: string; 
-  birth_year: string; 
+  gender: string;
+  birth_year: string;
   agency: string;
   service_type?: ServiceType;
   date: string;
@@ -109,29 +109,32 @@ export interface FormDataState {
   call_count: string;
   safety_trend: string;
   special_notes: string;
-  phone_indicators: Record<string, string>; 
-  
+  phone_indicators: Record<string, string>;
+
   // 1st Visit Mode (Risk Screening)
   env_check: string[];
   safety_check: string[];
   body_status: string;
-  visit_indicators: Record<string, string>; 
+  visit_indicators: Record<string, string>;
   final_grade: string;
   action_memo: string;
-  
+
   // 2nd Visit Mode (Interview)
   visit2_reason: string;
   track_stability: string;
   track_emotion: string;
   track_social: string;
   track_health: string;
-  interview_answers: Record<string, string>; 
+  interview_answers: Record<string, string>;
   interviewer_opinion: string;
 
   // Online Mode Updates
   service_duration: string;
   service_satisfaction_areas: string[];
-  outdoor_frequency: string; 
+  outdoor_frequency: string;
   visited_places: string[];
   online_opinion: string;
+
+  // Risk Target Flag (1차 대면 대상자 여부)
+  is_risk_target?: boolean;
 }

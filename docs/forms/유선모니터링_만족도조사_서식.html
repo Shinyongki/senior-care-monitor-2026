@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>유선 모니터링 만족도 조사 서식</title>
+  <style>
+    @page {
+      size: A4 portrait;
+      margin: 15mm;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Malgun Gothic', '맑은 고딕', sans-serif;
+      font-size: 11pt;
+      line-height: 1.6;
+      color: #333;
+      background: #fff;
+      padding: 20px;
+    }
+
+    .form-container {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    .header {
+      text-align: center;
+      border-bottom: 3px double #333;
+      padding-bottom: 15px;
+      margin-bottom: 20px;
+    }
+
+    .header h1 {
+      font-size: 20pt;
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+
+    .header h2 {
+      font-size: 14pt;
+      font-weight: normal;
+      color: #666;
+    }
+
+    .info-section {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 20px;
+      border: 1px solid #333;
+      padding: 15px;
+      background: #f9f9f9;
+    }
+
+    .info-item {
+      flex: 1 1 45%;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .info-item label {
+      font-weight: bold;
+      min-width: 80px;
+    }
+
+    .info-item .input-box {
+      flex: 1;
+      border-bottom: 1px solid #333;
+      min-height: 24px;
+      padding: 2px 5px;
+    }
+
+    .service-type-section {
+      margin-bottom: 30px;
+      page-break-inside: avoid;
+    }
+
+    .service-type-header {
+      background: #2c3e50;
+      color: white;
+      padding: 10px 15px;
+      font-size: 13pt;
+      font-weight: bold;
+      margin-bottom: 0;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 15px;
+    }
+
+    th,
+    td {
+      border: 1px solid #333;
+      padding: 10px;
+      text-align: left;
+    }
+
+    th {
+      background: #ecf0f1;
+      font-weight: bold;
+      text-align: center;
+    }
+
+    .indicator-label {
+      font-weight: bold;
+      width: 30%;
+    }
+
+    .options-cell {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
+    }
+
+    .option-item {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .checkbox {
+      width: 16px;
+      height: 16px;
+      border: 1px solid #333;
+      display: inline-block;
+    }
+
+    .notes-section {
+      margin-top: 20px;
+      border: 1px solid #333;
+      padding: 15px;
+    }
+
+    .notes-section h3 {
+      margin-bottom: 10px;
+      font-size: 12pt;
+    }
+
+    .notes-box {
+      width: 100%;
+      min-height: 80px;
+      border: 1px dashed #999;
+      padding: 10px;
+    }
+
+    .footer {
+      margin-top: 30px;
+      text-align: center;
+      font-size: 9pt;
+      color: #666;
+      border-top: 1px solid #ccc;
+      padding-top: 15px;
+    }
+
+    @media print {
+      body {
+        padding: 0;
+      }
+
+      .service-type-section {
+        page-break-inside: avoid;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="form-container">
+    <div class="header">
+      <h1>📞 유선 모니터링 만족도 조사</h1>
+      <h2>노인맞춤돌봄서비스 전화상담 체크리스트</h2>
+    </div>
+
+    <div class="info-section">
+      <div class="info-item">
+        <label>대상자명:</label>
+        <div class="input-box"></div>
+      </div>
+      <div class="info-item">
+        <label>조사일:</label>
+        <div class="input-box"></div>
+      </div>
+      <div class="info-item">
+        <label>조사자:</label>
+        <div class="input-box"></div>
+      </div>
+      <div class="info-item">
+        <label>연락처:</label>
+        <div class="input-box"></div>
+      </div>
+    </div>
+
+    <!-- 서비스 실태점검 -->
+    <div class="service-type-section">
+      <div class="service-type-header">📊 서비스 실태점검</div>
+      <table>
+        <tbody>
+          <tr>
+            <td class="indicator-label">서비스 만족도</td>
+            <td>
+              <div class="options-cell">
+                <div class="option-item"><span class="checkbox"></span> 매우만족</div>
+                <div class="option-item"><span class="checkbox"></span> 만족</div>
+                <div class="option-item"><span class="checkbox"></span> 보통</div>
+                <div class="option-item"><span class="checkbox"></span> 불만족</div>
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td class="indicator-label">주요 제공 서비스<br><small>(해당 항목 모두 체크)</small></td>
+            <td>
+              <div class="options-cell" style="flex-direction: column; gap: 5px;">
+                <div class="option-item"><span class="checkbox"></span> 안전지원(안전안부확인, 생활안전점검)</div>
+                <div class="option-item"><span class="checkbox"></span> 안전지원(정보제공, 말벗_정서지원)</div>
+                <div class="option-item"><span class="checkbox"></span> 사회참여(문화여가 활동, 자조모임)</div>
+                <div class="option-item"><span class="checkbox"></span> 생활교육(건강/영양보건교육, 우울예방, 인지활동/치매예방)</div>
+                <div class="option-item"><span class="checkbox"></span> 일상생활지원(가사지원_식사 청소관리, 이동활동지원)</div>
+                <div class="option-item"><span class="checkbox"></span> 연계서비스(건강지원, 주거개선, 생활지원 연계)</div>
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td class="indicator-label">방문 빈도</td>
+            <td>
+              <div class="options-cell">
+                <div class="option-item"><span class="checkbox"></span> 주 1회</div>
+                <div class="option-item"><span class="checkbox"></span> 주 2회</div>
+                <div class="option-item"><span class="checkbox"></span> 주 3회</div>
+                <div class="option-item"><span class="checkbox"></span> 매일</div>
+                <div class="option-item"><span class="checkbox"></span> 미제공</div>
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td class="indicator-label">유선 빈도</td>
+            <td>
+              <div class="options-cell">
+                <div class="option-item"><span class="checkbox"></span> 주 1회</div>
+                <div class="option-item"><span class="checkbox"></span> 주 2회</div>
+                <div class="option-item"><span class="checkbox"></span> 주 3회</div>
+                <div class="option-item"><span class="checkbox"></span> 매일</div>
+                <div class="option-item"><span class="checkbox"></span> 미제공</div>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+
+    <!-- 일반 서비스 -->
+    <div class="service-type-section">
+      <div class="service-type-header">📋 일반 서비스 대상자용</div>
+      <table>
+        <thead>
+          <tr>
+            <th style="width:30%">점검 항목</th>
+            <th>응답 선택</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="indicator-label">생활 안정성</td>
+            <td>
+              <div class="options-cell">
+                <div class="option-item"><span class="checkbox"></span> 매우안정</div>
+                <div class="option-item"><span class="checkbox"></span> 안정</div>
+                <div class="option-item"><span class="checkbox"></span> 보통</div>
+                <div class="option-item"><span class="checkbox"></span> 불안요소 발견</div>
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td class="indicator-label">고독감 해소</td>
+            <td>
+              <div class="options-cell">
+                <div class="option-item"><span class="checkbox"></span> 많이 해소됨</div>
+                <div class="option-item"><span class="checkbox"></span> 조금 해소됨</div>
+                <div class="option-item"><span class="checkbox"></span> 변화 없음</div>
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td class="indicator-label">안전망 체감도</td>
+            <td>
+              <div class="options-cell">
+                <div class="option-item"><span class="checkbox"></span> 매우안심</div>
+                <div class="option-item"><span class="checkbox"></span> 안심</div>
+                <div class="option-item"><span class="checkbox"></span> 여전히 불안</div>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- 퇴원환자 단기 집중 -->
+    <div class="service-type-section">
+      <div class="service-type-header">🏥 퇴원환자 단기 집중 대상자용</div>
+      <table>
+        <thead>
+          <tr>
+            <th style="width:30%">점검 항목</th>
+            <th>응답 선택</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="indicator-label">초기 안착 및 자립</td>
+            <td>
+              <div class="options-cell">
+                <div class="option-item"><span class="checkbox"></span> 식사/복약 원활</div>
+                <div class="option-item"><span class="checkbox"></span> 자립 어려움</div>
+                <div class="option-item"><span class="checkbox"></span> 도움 절실</div>
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td class="indicator-label">재입원 불안 해소</td>
+            <td>
+              <div class="options-cell">
+                <div class="option-item"><span class="checkbox"></span> 매우안심</div>
+                <div class="option-item"><span class="checkbox"></span> 안심</div>
+                <div class="option-item"><span class="checkbox"></span> 여전히 불안</div>
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td class="indicator-label">가사/신체지원 만족</td>
+            <td>
+              <div class="options-cell">
+                <div class="option-item"><span class="checkbox"></span> 매우만족</div>
+                <div class="option-item"><span class="checkbox"></span> 만족</div>
+                <div class="option-item"><span class="checkbox"></span> 불만족</div>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- 특화서비스 -->
+    <div class="service-type-section">
+      <div class="service-type-header">💚 특화서비스 대상자용</div>
+      <table>
+        <thead>
+          <tr>
+            <th style="width:30%">점검 항목</th>
+            <th>응답 선택</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="indicator-label">정서적 변화</td>
+            <td>
+              <div class="options-cell">
+                <div class="option-item"><span class="checkbox"></span> 매우밝아짐</div>
+                <div class="option-item"><span class="checkbox"></span> 밝아짐</div>
+                <div class="option-item"><span class="checkbox"></span> 우울감 지속</div>
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td class="indicator-label">사회적 관계 형성</td>
+            <td>
+              <div class="options-cell">
+                <div class="option-item"><span class="checkbox"></span> 이웃교류 증가</div>
+                <div class="option-item"><span class="checkbox"></span> 인사만 함</div>
+                <div class="option-item"><span class="checkbox"></span> 여전히 고립</div>
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td class="indicator-label">프로그램 만족도</td>
+            <td>
+              <div class="options-cell">
+                <div class="option-item"><span class="checkbox"></span> 매우만족</div>
+                <div class="option-item"><span class="checkbox"></span> 만족</div>
+                <div class="option-item"><span class="checkbox"></span> 불만족</div>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="notes-section">
+      <h3>📝 특이사항 및 추가 관찰 내용</h3>
+      <div class="notes-box"></div>
+    </div>
+
+    <div class="footer">
+      <p>노인맞춤돌봄서비스 통합 모니터링 시스템 | Senior Care Monitor 2026</p>
+    </div>
+  </div>
+</body>
+
+</html>

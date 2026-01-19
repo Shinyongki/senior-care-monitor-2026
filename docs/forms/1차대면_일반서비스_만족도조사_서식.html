@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>1차 대면 만족도 조사 서식 - 일반 서비스</title>
+    <style>
+        @page {
+            size: A4 portrait;
+            margin: 12mm;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Malgun Gothic', '맑은 고딕', sans-serif;
+            font-size: 10pt;
+            line-height: 1.5;
+            color: #333;
+            background: #fff;
+            padding: 15px;
+        }
+
+        .form-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            border-bottom: 3px double #2c3e50;
+            padding-bottom: 12px;
+            margin-bottom: 15px;
+        }
+
+        .header h1 {
+            font-size: 18pt;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 3px;
+        }
+
+        .header h2 {
+            font-size: 12pt;
+            font-weight: normal;
+            color: #666;
+        }
+
+        .info-section {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 15px;
+            border: 1px solid #2c3e50;
+            padding: 12px;
+            background: #f8f9fa;
+        }
+
+        .info-item {
+            flex: 1 1 30%;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .info-item label {
+            font-weight: bold;
+            min-width: 70px;
+            font-size: 9pt;
+        }
+
+        .info-item .input-box {
+            flex: 1;
+            border-bottom: 1px solid #333;
+            min-height: 20px;
+            padding: 2px 5px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 15px;
+        }
+
+        th,
+        td {
+            border: 1px solid #333;
+            padding: 6px 8px;
+            text-align: left;
+            vertical-align: top;
+        }
+
+        th {
+            background: #2c3e50;
+            color: white;
+            font-weight: bold;
+            text-align: center;
+            font-size: 9pt;
+        }
+
+        .q-number {
+            font-weight: bold;
+            color: #2c3e50;
+            width: 25px;
+            text-align: center;
+        }
+
+        .question-text {
+            font-size: 9pt;
+            line-height: 1.4;
+        }
+
+        .options-container {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            font-size: 8.5pt;
+        }
+
+        .option-row {
+            display: flex;
+            align-items: flex-start;
+            gap: 5px;
+        }
+
+        .checkbox {
+            width: 12px;
+            height: 12px;
+            border: 1px solid #333;
+            display: inline-block;
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+
+        .option-text {
+            line-height: 1.3;
+        }
+
+        .grade-cell {
+            text-align: center;
+            font-size: 8pt;
+            color: #666;
+        }
+
+        .notes-section {
+            margin-top: 15px;
+            border: 1px solid #2c3e50;
+            padding: 10px;
+        }
+
+        .notes-section h3 {
+            margin-bottom: 8px;
+            font-size: 10pt;
+            color: #2c3e50;
+        }
+
+        .notes-box {
+            width: 100%;
+            min-height: 60px;
+            border: 1px dashed #999;
+            padding: 8px;
+        }
+
+        .footer {
+            margin-top: 15px;
+            text-align: center;
+            font-size: 8pt;
+            color: #666;
+            border-top: 1px solid #ccc;
+            padding-top: 10px;
+        }
+
+        .legend {
+            margin-bottom: 10px;
+            padding: 8px;
+            background: #e8f4f8;
+            border-left: 4px solid #3498db;
+            font-size: 8.5pt;
+        }
+
+        @media print {
+            body {
+                padding: 0;
+            }
+
+            .form-container {
+                page-break-inside: avoid;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="form-container">
+        <div class="header">
+            <h1>🏠 1차 대면 만족도 조사</h1>
+            <h2>일반 서비스 대상자용 (10문항)</h2>
+        </div>
+
+        <div class="info-section">
+            <div class="info-item">
+                <label>대상자명:</label>
+                <div class="input-box"></div>
+            </div>
+            <div class="info-item">
+                <label>조사일:</label>
+                <div class="input-box"></div>
+            </div>
+            <div class="info-item">
+                <label>조사자:</label>
+                <div class="input-box"></div>
+            </div>
+            <div class="info-item">
+                <label>시군:</label>
+                <div class="input-box"></div>
+            </div>
+            <div class="info-item">
+                <label>수행기관:</label>
+                <div class="input-box"></div>
+            </div>
+            <div class="info-item">
+                <label>서비스유형:</label>
+                <div class="input-box">일반 서비스</div>
+            </div>
+        </div>
+
+        <div class="legend">
+            <strong>📌 응답 해석 안내:</strong> 각 문항별 4개 응답은 좌측부터 긍정→부정 순서입니다. 괄호 안은 판정 기준입니다.
+        </div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th style="width:4%">No</th>
+                    <th style="width:38%">질문 내용</th>
+                    <th style="width:58%">응답 선택 (해당 항목에 ✓ 체크)</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td class="q-number">1</td>
+                    <td class="question-text">혼자 지내시면서 가장 불안하거나 걱정되는 순간은 언제인가요?</td>
+                    <td>
+                        <div class="options-container">
+                            <div class="option-row"><span class="checkbox"></span><span class="option-text">없음 (평소 불안감
+                                    없음)</span></div>
+                            <div class="option-row"><span class="checkbox"></span><span class="option-text">가끔 (밤이나 아플 때
+                                    걱정)</span></div>
+                            <div class="option-row"><span class="checkbox"></span><span class="option-text">자주 (수시로 불안감
+                                    느낌)</span></div>
+                            <div class="option-row"><span class="checkbox"></span><span class="option-text">항상 (극도의 공포/잠
+                                    못 둠)</span></div>
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="q-number">2</td>
+                    <td class="question-text">복지관 친구들을 만나고 오면 기분이 좀 어떠세요?</td>
+                    <td>
+                        <div class="options-container">
+                            <div class="option-row"><span class="checkbox"></span><span class="option-text">매우 좋음 (활력
+                                    생김)</span></div>
+                            <div class="option-row"><span class="checkbox"></span><span class="option-text">보통 (큰 변화
+                                    없음)</span></div>
+                            <div class="option-row"><span class="checkbox"></span><span class="option-text">별로 (오히려
+                                    피곤함)</span></div>
+                            <div class="option-row"><span class="checkbox"></span><span class="option-text">싫음 (만남
+                                    거부/고립)</span></div>
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="q-number">3</td>
+                    <td class="question-text">선생님께 배운 건강 체조를 집에서도 혼자 해보시나요?</td>
+                    <td>
+                        <div class="options-container">
+                            <div class="option-row"><span class="checkbox"></span><span class="option-text">매일 함 (수칙
+                                    준수)</span></div>
+                            <div class="option-row"><span class="checkbox"></span><span class="option-text">가끔 함 (노력
+                                    중)</span></div>
+                            <div class="option-row"><span class="checkbox"></span><span class="option-text">거의 안 함 (방법
+                                    미흡)</span></div>
+                            <div class="option-row"><span class="checkbox"></span><span class="option-text">아예 안 함
+                                    (포기/의지 없음)</span></div>
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="q-number">4</td>
+                    <td class="question-text">스마트폰 쓰는 게 어렵진 않으세요? 자녀분께 사진도 보내시나요?</td>
+                    <td>
+                        <div class="options-container">
+                            <div class="option-row"><span class="checkbox"></span><span class="option-text">쉬움 (사진전송
+                                    가능/능숙)</span></div>
+                            <div class="option-row"><span class="checkbox"></span><span class="option-text">보통 (전화만
+                                    가능)</span></div>
+                            <div class="option-row"><span class="checkbox"></span><span class="option-text">어려움 (사용법
+                                    미숙)</span></div>
+                            <div class="option-row"><span class="checkbox"></span><span class="option-text">못함 (사용
+                                    거부/불가)</span></div>
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="q-number">5</td>
+                    <td class="question-text">갑자기 급한 일이 생기면 누구한테 가장 먼저 연락하세요?</td>
+                    <td>
+                        <div class="options-container">
+                            <div class="option-row"><span class="checkbox"></span><span class="option-text">있음 (자녀/이웃 등
+                                    확보)</span></div>
+                            <div class="option-row"><span class="checkbox"></span><span class="option-text">애매함 (연락처는
+                                    앎)</span></div>
+                            <div class="option-row"><span class="checkbox"></span><span class="option-text">없음 (연락할 곳
+                                    취약)</span></div>
+                            <div class="option-row"><span class="checkbox"></span><span class="option-text">생각 안 함 (외부
+                                    단절)</span></div>
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="q-number">6</td>
+                    <td class="question-text">요즘 하루하루 지내시는 게 좀 즐거우신가요?</td>
+                    <td>
+                        <div class="options-container">
+                            <div class="option-row"><span class="checkbox"></span><span class="option-text">즐거움 (생활
+                                    만족)</span></div>
+                            <div class="option-row"><span class="checkbox"></span><span class="option-text">그저 그렇다
+                                    (보통)</span></div>
+                            <div class="option-row"><span class="checkbox"></span><span class="option-text">힘들다
+                                    (불편/불만)</span></div>
+                            <div class="option-row"><span class="checkbox"></span><span class="option-text">괴롭다 (서비스
+                                    거부/우울)</span></div>
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="q-number">7</td>
+                    <td class="question-text">선생님이 오셔서 말벗해드리는 게 도움이 되세요?</td>
+                    <td>
+                        <div class="options-container">
+                            <div class="option-row"><span class="checkbox"></span><span class="option-text">도움됨 (외로움
+                                    해소)</span></div>
+                            <div class="option-row"><span class="checkbox"></span><span class="option-text">보통 (여전히
+                                    적적함)</span></div>
+                            <div class="option-row"><span class="checkbox"></span><span class="option-text">별로 (도움 안
+                                    됨)</span></div>
+                            <div class="option-row"><span class="checkbox"></span><span class="option-text">싫음 (방문
+                                    거부/고립)</span></div>
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="q-number">8</td>
+                    <td class="question-text">기억력이 예전 같지 않아서 걱정되진 않으세요?</td>
+                    <td>
+                        <div class="options-container">
+                            <div class="option-row"><span class="checkbox"></span><span class="option-text">걱정 없음
+                                    (양호)</span></div>
+                            <div class="option-row"><span class="checkbox"></span><span class="option-text">가끔 깜빡함
+                                    (보통)</span></div>
+                            <div class="option-row"><span class="checkbox"></span><span class="option-text">자주 잊어버림
+                                    (인지저하)</span></div>
+                            <div class="option-row"><span class="checkbox"></span><span class="option-text">아무것도 기억 안 남
+                                    (위험/치매)</span></div>
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="q-number">9</td>
+                    <td class="question-text">식사는 제때 챙겨 드시고 계신가요?</td>
+                    <td>
+                        <div class="options-container">
+                            <div class="option-row"><span class="checkbox"></span><span class="option-text">잘 챙겨 먹음
+                                    (규칙적)</span></div>
+                            <div class="option-row"><span class="checkbox"></span><span class="option-text">가끔 거름
+                                    (보통)</span></div>
+                            <div class="option-row"><span class="checkbox"></span><span class="option-text">자주 거름
+                                    (불량)</span></div>
+                            <div class="option-row"><span class="checkbox"></span><span class="option-text">거의 안 먹음 (식사
+                                    거부/위험)</span></div>
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="q-number">10</td>
+                    <td class="question-text">내년에도 복지관에 계속 나오고 싶으세요?</td>
+                    <td>
+                        <div class="options-container">
+                            <div class="option-row"><span class="checkbox"></span><span class="option-text">꼭 나오고 싶음
+                                    (희망)</span></div>
+                            <div class="option-row"><span class="checkbox"></span><span class="option-text">상황 봐서
+                                    (고려)</span></div>
+                            <div class="option-row"><span class="checkbox"></span><span class="option-text">잘 모르겠음
+                                    (미온)</span></div>
+                            <div class="option-row"><span class="checkbox"></span><span class="option-text">그만두고 싶음
+                                    (중단)</span></div>
+                        </div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="notes-section">
+            <h3>📝 현장 관찰 및 특이사항</h3>
+            <div class="notes-box"></div>
+        </div>
+
+        <div class="footer">
+            <p>노인맞춤돌봄서비스 통합 모니터링 시스템 | 1차 대면 - 일반 서비스</p>
+        </div>
+    </div>
+</body>
+
+</html>

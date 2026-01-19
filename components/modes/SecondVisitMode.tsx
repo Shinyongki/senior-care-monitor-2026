@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { Card } from '../ui/Card';
 import { FormDataState, Hypothesis, Candidate } from '../../types';
 import { INTERVIEW_QUESTIONS, REGION_AGENCY_MAP } from '../../constants';
-import { UserCheck, MessageCircle, TrendingUp, AlertCircle, Star, GitCompare } from 'lucide-react';
+import { UserCheck, MessageCircle, TrendingUp, AlertCircle, Star, GitCompare, Users, PlusCircle, Edit, Trash2, Save, X } from 'lucide-react';
 
 interface SecondVisitModeProps {
   formData: FormDataState;
@@ -11,12 +11,18 @@ interface SecondVisitModeProps {
   hypotheses: Hypothesis[];
   setHypotheses: React.Dispatch<React.SetStateAction<Hypothesis[]>>;
   candidates: Candidate[];
-  showToast: (msg: string) => void;
+  setCandidates?: React.Dispatch<React.SetStateAction<Candidate[]>>;
+  showToast: (msg: string, type?: 'success' | 'error' | 'info') => void;
 }
 
 const SecondVisitMode: React.FC<SecondVisitModeProps> = ({
-  formData, updateField, hypotheses, setHypotheses, candidates, showToast
+  formData, updateField, hypotheses, setHypotheses, candidates, setCandidates, showToast
 }) => {
+
+  // CRUD State
+  const [showCandidateList, setShowCandidateList] = useState(false);
+  const [editingCandidate, setEditingCandidate] = useState<Candidate | null>(null);
+  const [isCreating, setIsCreating] = useState(false);
 
   // When a candidate is selected, populate the form
   const handleCandidateSelect = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -25,31 +31,34 @@ const SecondVisitMode: React.FC<SecondVisitModeProps> = ({
 
     const selected = candidates.find(c => c.id === candidateId);
     if (selected) {
-      updateField('name', selected.name);
-      updateField('agency', selected.agency);
-      updateField('gender', selected.gender);
-      updateField('birth_year', selected.birth_year);
-      updateField('visit2_reason', selected.reasonType || '데이터불일치');
-
-      // Auto-set region based on agency
-      const region = Object.keys(REGION_AGENCY_MAP).find(r =>
-        REGION_AGENCY_MAP[r].includes(selected.agency)
-      );
-      if (region) updateField('region', region);
-
-      // Populate Service Type (Critical for Dynamic Questions)
-      if (selected.service_type) updateField('service_type', selected.service_type);
-
-      // Populate Interview Data
-      updateField('track_stability', selected.track_stability || '개선');
-      updateField('track_emotion', selected.track_emotion || '개선');
-      updateField('track_social', selected.track_social || '개선');
-      updateField('track_health', selected.track_health || '개선');
-      updateField('interview_answers', selected.interview_answers || {});
-      updateField('interviewer_opinion', selected.interviewer_opinion || '');
-
-      showToast(`🎯 '${selected.name}' 대상자 정보 및 심층 면접 결과를 불러왔습니다.`);
+      populateFormFromCandidate(selected);
+      showToast(`🎯 '${selected.name}' 대상자 정보 및 심층 면접 결과를 불러왔습니다.`, 'success');
     }
+  };
+
+  const populateFormFromCandidate = (selected: Candidate) => {
+    updateField('name', selected.name);
+    updateField('agency', selected.agency);
+    updateField('gender', selected.gender);
+    updateField('birth_year', selected.birth_year);
+    updateField('visit2_reason', selected.reasonType || '데이터불일치');
+
+    // Auto-set region based on agency
+    const region = Object.keys(REGION_AGENCY_MAP).find(r =>
+      REGION_AGENCY_MAP[r].includes(selected.agency)
+    );
+    if (region) updateField('region', region);
+
+    // Populate Service Type (Critical for Dynamic Questions)
+    if (selected.service_type) updateField('service_type', selected.service_type);
+
+    // Populate Interview Data
+    updateField('track_stability', selected.track_stability || '개선');
+    updateField('track_emotion', selected.track_emotion || '개선');
+    updateField('track_social', selected.track_social || '개선');
+    updateField('track_health', selected.track_health || '개선');
+    updateField('interview_answers', selected.interview_answers || {});
+    updateField('interviewer_opinion', selected.interviewer_opinion || '');
   };
 
   const handleAnswerChange = (id: string, value: string) => {
@@ -57,6 +66,80 @@ const SecondVisitMode: React.FC<SecondVisitModeProps> = ({
       ...formData.interview_answers,
       [id]: value
     });
+  };
+
+  // CRUD Handlers
+  const handleDeleteCandidate = (id: number) => {
+    if (!setCandidates) {
+      showToast('⚠️ 데이터 저장 기능이 연결되지 않았습니다.', 'error');
+      return;
+    }
+    if (window.confirm('정말 삭제하시겠습니까?')) {
+      setCandidates(prev => prev.filter(c => c.id !== id));
+      showToast('🗑️ 삭제 완료', 'info');
+    }
+  };
+
+  const handleAddNewCandidate = () => {
+    if (!setCandidates) {
+      showToast('⚠️ 데이터 저장 기능이 연결되지 않았습니다.', 'error');
+      return;
+    }
+    if (!formData.name) {
+      showToast('⚠️ 성명을 입력해주세요.', 'error');
+      return;
+    }
+    const newCandidate: Candidate = {
+      id: Date.now(),
+      name: formData.name,
+      gender: formData.gender,
+      birth_year: formData.birth_year,
+      agency: formData.agency,
+      service_type: formData.service_type,
+      reason: formData.interviewer_opinion || '심층면접 대상',
+      reasonType: formData.visit2_reason as '성과우수군' | '데이터불일치' | '특이사례' || '데이터불일치',
+      track_stability: formData.track_stability as string,
+      track_emotion: formData.track_emotion as string,
+      track_social: formData.track_social as string,
+      track_health: formData.track_health as string,
+      interview_answers: formData.interview_answers,
+      interviewer_opinion: formData.interviewer_opinion
+    };
+    setCandidates(prev => [...prev, newCandidate]);
+    showToast('✅ 등록 완료', 'success');
+    setIsCreating(false);
+  };
+
+  const handleUpdateCandidate = () => {
+    if (!setCandidates) {
+      showToast('⚠️ 데이터 저장 기능이 연결되지 않았습니다.', 'error');
+      return;
+    }
+    if (!editingCandidate) return;
+
+    setCandidates(prev => prev.map(c => c.id === editingCandidate.id ? {
+      ...c,
+      name: formData.name,
+      gender: formData.gender,
+      birth_year: formData.birth_year,
+      agency: formData.agency,
+      service_type: formData.service_type,
+      reason: formData.interviewer_opinion || c.reason,
+      reasonType: formData.visit2_reason as '성과우수군' | '데이터불일치' | '특이사례' || c.reasonType,
+      track_stability: formData.track_stability as string,
+      track_emotion: formData.track_emotion as string,
+      track_social: formData.track_social as string,
+      track_health: formData.track_health as string,
+      interview_answers: formData.interview_answers,
+      interviewer_opinion: formData.interviewer_opinion
+    } : c));
+    showToast('✅ 수정 완료', 'success');
+    setEditingCandidate(null);
+  };
+
+  const startEditing = (candidate: Candidate) => {
+    setEditingCandidate(candidate);
+    populateFormFromCandidate(candidate);
   };
 
   const currentQuestions = INTERVIEW_QUESTIONS[formData.visit2_reason as keyof typeof INTERVIEW_QUESTIONS] || INTERVIEW_QUESTIONS['성과우수군'];
@@ -91,29 +174,117 @@ const SecondVisitMode: React.FC<SecondVisitModeProps> = ({
   return (
     <div className="space-y-6 animate-fade-in">
 
-      {/* Candidate Selection */}
-      {candidates.length > 0 && (
-        <div className="bg-violet-600 p-4 rounded-xl shadow-md text-white flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <div className="bg-white/20 p-2 rounded-full"><UserCheck size={20} /></div>
-            <div>
-              <h3 className="font-bold">면접 대상자 불러오기</h3>
-              <p className="text-violet-200 text-xs">온라인 설문 분석(가설 검증) 단계에서 식별된 심층 인터뷰 대상자입니다.</p>
-            </div>
+      {/* Candidate Management Section */}
+      <div className="bg-white rounded-xl shadow-lg border border-violet-200 overflow-hidden">
+        <div className="bg-violet-600 p-4 flex items-center justify-between text-white">
+          <div className="flex items-center gap-2">
+            <Users size={20} />
+            <h3 className="font-bold">심층면접 대상자 ({candidates.length}명)</h3>
           </div>
-          <select
-            onChange={handleCandidateSelect}
-            className="text-slate-800 text-sm p-2 rounded-lg border-none outline-none w-full md:w-80 font-medium"
-          >
-            <option value="">대상자 선택...</option>
-            {candidates.map(c => (
-              <option key={c.id} value={c.id}>
-                [{c.reasonType || '미지정'}] {c.name} ({c.agency})
-              </option>
-            ))}
-          </select>
+          <div className="flex gap-2">
+            <button onClick={() => setShowCandidateList(!showCandidateList)} className="px-3 py-1.5 bg-white/20 hover:bg-white/30 rounded-lg text-sm">
+              {showCandidateList ? '접기' : '목록'}
+            </button>
+            {setCandidates && (
+              <button onClick={() => setIsCreating(true)} className="px-3 py-1.5 bg-white text-violet-600 rounded-lg text-sm font-bold flex items-center gap-1">
+                <PlusCircle size={14} /> 등록
+              </button>
+            )}
+          </div>
         </div>
-      )}
+
+        {showCandidateList && (
+          <div className="p-4 overflow-x-auto">
+            {candidates.length === 0 ? (
+              <div className="text-center text-slate-400 py-6">등록된 대상자 없음</div>
+            ) : (
+              <table className="w-full text-sm">
+                <thead><tr className="bg-slate-50 text-slate-600">
+                  <th className="p-2 text-left">성명</th><th className="p-2 text-left">기관</th><th className="p-2 text-left">유형</th><th className="p-2 text-center">작업</th>
+                </tr></thead>
+                <tbody>
+                  {candidates.map(c => (
+                    <tr key={c.id} className={`border-b hover:bg-slate-50 ${editingCandidate?.id === c.id ? 'bg-amber-50' : ''}`}>
+                      <td className="p-2 font-medium">{c.name}</td>
+                      <td className="p-2 text-slate-600">{c.agency}</td>
+                      <td className="p-2"><span className={`px-2 py-0.5 rounded text-xs font-bold ${c.reasonType === '성과우수군' ? 'bg-yellow-100 text-yellow-700' :
+                          c.reasonType === '데이터불일치' ? 'bg-blue-100 text-blue-700' :
+                            c.reasonType === '특이사례' ? 'bg-red-100 text-red-700' : 'bg-slate-100'
+                        }`}>{c.reasonType || '-'}</span></td>
+                      <td className="p-2 flex justify-center gap-1">
+                        <button onClick={() => startEditing(c)} className="p-1 bg-blue-100 text-blue-600 rounded"><Edit size={14} /></button>
+                        {setCandidates && <button onClick={() => handleDeleteCandidate(c.id)} className="p-1 bg-red-100 text-red-600 rounded"><Trash2 size={14} /></button>}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+          </div>
+        )}
+
+        {(editingCandidate || isCreating) && (
+          <div className="p-4 bg-amber-50 border-t border-amber-200 flex flex-col gap-3">
+            <div className="flex items-center justify-between">
+              <span className="text-amber-800 text-sm font-bold flex items-center gap-2">
+                {isCreating ? '🆕 신규 대상자 등록' : `✏️ '${editingCandidate?.name}' 정보 수정`}
+              </span>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => {
+                    if (isCreating) handleAddNewCandidate();
+                    else handleUpdateCandidate();
+                  }}
+                  className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white font-bold rounded-lg flex items-center gap-1 shadow-sm transition-colors"
+                >
+                  <Save size={16} /> {isCreating ? '등록 완료' : '수정 저장'}
+                </button>
+                <button
+                  onClick={() => { setEditingCandidate(null); setIsCreating(false); }}
+                  className="px-4 py-2 bg-white border border-slate-300 text-slate-600 font-bold rounded-lg flex items-center gap-1 hover:bg-slate-50 transition-colors"
+                >
+                  <X size={16} /> 취소
+                </button>
+              </div>
+            </div>
+
+            {/* Inline Editor for Core Fields */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-white p-3 rounded-lg border border-amber-100">
+              <div>
+                <label className="block text-xs font-bold text-slate-500 mb-1">성명 (필수)</label>
+                <input
+                  type="text"
+                  value={formData.name || ''}
+                  onChange={(e) => updateField('name', e.target.value)}
+                  className="w-full border-slate-300 rounded-md text-sm p-2 focus:ring-2 focus:ring-amber-500 outline-none"
+                  placeholder="대상자 성명 입력"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-slate-500 mb-1">수행기관</label>
+                <input
+                  type="text"
+                  value={formData.agency || ''}
+                  onChange={(e) => updateField('agency', e.target.value)}
+                  className="w-full border-slate-300 rounded-md text-sm p-2 focus:ring-2 focus:ring-amber-500 outline-none"
+                  placeholder="수행기관명"
+                />
+              </div>
+            </div>
+            <p className="text-xs text-amber-600">* 하단의 면접 내용을 모두 작성한 후 '저장'을 눌러주세요.</p>
+          </div>
+        )}
+
+        {!editingCandidate && !isCreating && candidates.length > 0 && (
+          <div className="p-3 border-t flex items-center gap-2">
+            <span className="text-xs text-slate-500">불러오기:</span>
+            <select onChange={handleCandidateSelect} className="text-sm p-1.5 border rounded flex-1">
+              <option value="">선택...</option>
+              {candidates.map(c => <option key={c.id} value={c.id}>[{c.reasonType || '미지정'}] {c.name}</option>)}
+            </select>
+          </div>
+        )}
+      </div>
 
       <Card title="🎯 임팩트 추적 심층 면접" color="violet">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-8">

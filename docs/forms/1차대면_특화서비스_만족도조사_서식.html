@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>1차 대면 만족도 조사 서식 - 특화서비스</title>
+    <style>
+        @page {
+            size: A4 portrait;
+            margin: 12mm;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Malgun Gothic', '맑은 고딕', sans-serif;
+            font-size: 10pt;
+            line-height: 1.5;
+            color: #333;
+            background: #fff;
+            padding: 15px;
+        }
+
+        .form-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            border-bottom: 3px double #27ae60;
+            padding-bottom: 12px;
+            margin-bottom: 15px;
+        }
+
+        .header h1 {
+            font-size: 18pt;
+            font-weight: bold;
+            color: #27ae60;
+            margin-bottom: 3px;
+        }
+
+        .header h2 {
+            font-size: 12pt;
+            font-weight: normal;
+            color: #666;
+        }
+
+        .info-section {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 15px;
+            border: 1px solid #27ae60;
+            padding: 12px;
+            background: #f0fff4;
+        }
+
+        .info-item {
+            flex: 1 1 30%;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .info-item label {
+            font-weight: bold;
+            min-width: 70px;
+            font-size: 9pt;
+        }
+
+        .info-item .input-box {
+            flex: 1;
+            border-bottom: 1px solid #333;
+            min-height: 20px;
+            padding: 2px 5px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 15px;
+        }
+
+        th,
+        td {
+            border: 1px solid #333;
+            padding: 6px 8px;
+            text-align: left;
+            vertical-align: top;
+        }
+
+        th {
+            background: #27ae60;
+            color: white;
+            font-weight: bold;
+            text-align: center;
+            font-size: 9pt;
+        }
+
+        .q-number {
+            font-weight: bold;
+            color: #27ae60;
+            width: 25px;
+            text-align: center;
+        }
+
+        .question-text {
+            font-size: 9pt;
+            line-height: 1.4;
+        }
+
+        .options-container {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            font-size: 8.5pt;
+        }
+
+        .option-row {
+            display: flex;
+            align-items: flex-start;
+            gap: 5px;
+        }
+
+        .checkbox {
+            width: 12px;
+            height: 12px;
+            border: 1px solid #333;
+            display: inline-block;
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+
+        .option-text {
+            line-height: 1.3;
+        }
+
+        .notes-section {
+            margin-top: 15px;
+            border: 1px solid #27ae60;
+            padding: 10px;
+        }
+
+        .notes-section h3 {
+            margin-bottom: 8px;
+            font-size: 10pt;
+            color: #27ae60;
+        }
+
+        .notes-box {
+            width: 100%;
+            min-height: 60px;
+            border: 1px dashed #999;
+            padding: 8px;
+        }
+
+        .footer {
+            margin-top: 15px;
+            text-align: center;
+            font-size: 8pt;
+            color: #666;
+            border-top: 1px solid #ccc;
+            padding-top: 10px;
+        }
+
+        .legend {
+            margin-bottom: 10px;
+            padding: 8px;
+            background: #e8f8e8;
+            border-left: 4px solid #27ae60;
+            font-size: 8.5pt;
+        }
+
+        .warning-box {
+            background: #fff3cd;
+            border: 1px solid #ffc107;
+            padding: 8px;
+            margin-top: 10px;
+            font-size: 9pt;
+        }
+
+        @media print {
+            body {
+                padding: 0;
+            }
+
+            .form-container {
+                page-break-inside: avoid;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="form-container">
+        <div class="header">
+            <h1>💚 1차 대면 만족도 조사</h1>
+            <h2>특화서비스 대상자용 (10문항)</h2>
+        </div>
+
+        <div class="info-section">
+            <div class="info-item">
+                <label>대상자명:</label>
+                <div class="input-box"></div>
+            </div>
+            <div class="info-item">
+                <label>조사일:</label>
+                <div class="input-box"></div>
+            </div>
+            <div class="info-item">
+                <label>조사자:</label>
+                <div class="input-box"></div>
+            </div>
+            <div class="info-item">
+                <label>시군:</label>
+                <div class="input-box"></div>
+            </div>
+            <div class="info-item">
+                <label>수행기관:</label>
+                <div class="input-box"></div>
+            </div>
+            <div class="info-item">
+                <label>서비스유형:</label>
+                <div class="input-box">특화서비스</div>
+            </div>
+        </div>
+
+        <div class="legend">
+            <strong>💚 특화서비스 대상:</strong> 우울・은둔 등 정서적 고위험군 대상자의 심리정서적 변화에 초점을 둔 문항입니다.
+        </div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th style="width:4%">No</th>
+                    <th style="width:38%">질문 내용</th>
+                    <th style="width:58%">응답 선택 (해당 항목에 ✓ 체크)</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td class="q-number">1</td>
+                    <td class="question-text">요즘도 이유 없이 슬프거나 울적하세요?</td>
+                    <td>
+                        <div class="options-container">
+                            <div class="option-row"><span class="checkbox"></span><span class="option-text">안 그럼
+                                    (호전)</span></div>
+                            <div class="option-row"><span class="checkbox"></span><span class="option-text">가끔 그럼
+                                    (보통)</span></div>
+                            <div class="option-row"><span class="checkbox"></span><span class="option-text">여전히 그럼
+                                    (지속)</span></div>
+                            <div class="option-row"><span class="checkbox"></span><span class="option-text">더 심해짐
+                                    (심화/비관)</span></div>
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="q-number">2</td>
+                    <td class="question-text">앞으로 살아가는 게 좀 기대가 되시나요?</td>
+                    <td>
+                        <div class="options-container">
+                            <div class="option-row"><span class="checkbox"></span><span class="option-text">기대됨 (희망
+                                    생성)</span></div>
+                            <div class="option-row"><span class="checkbox"></span><span class="option-text">그저 그럼
+                                    (보통)</span></div>
+                            <div class="option-row"><span class="checkbox"></span><span class="option-text">기대 없음
+                                    (무망)</span></div>
+                            <div class="option-row"><span class="checkbox"></span><span class="option-text">막막함 (절망/살 이유
+                                    없음)</span></div>
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="q-number">3</td>
+                    <td class="question-text">사람들 만나는 게 여전히 불편하고 싫으세요?</td>
+                    <td>
+                        <div class="options-container">
+                            <div class="option-row"><span class="checkbox"></span><span class="option-text">괜찮음
+                                    (편안)</span></div>
+                            <div class="option-row"><span class="checkbox"></span><span class="option-text">노력 중
+                                    (보통)</span></div>
+                            <div class="option-row"><span class="checkbox"></span><span class="option-text">여전히 불편
+                                    (회피)</span></div>
+                            <div class="option-row"><span class="checkbox"></span><span class="option-text">너무 싫음
+                                    (거부/단절)</span></div>
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="q-number">4</td>
+                    <td class="question-text">복지관 안 오는 날에는 바깥에 좀 나가시나요?</td>
+                    <td>
+                        <div class="options-container">
+                            <div class="option-row"><span class="checkbox"></span><span class="option-text">자주 나감
+                                    (증가)</span></div>
+                            <div class="option-row"><span class="checkbox"></span><span class="option-text">가끔 나감
+                                    (유지)</span></div>
+                            <div class="option-row"><span class="checkbox"></span><span class="option-text">거의 안 나감
+                                    (저조)</span></div>
+                            <div class="option-row"><span class="checkbox"></span><span class="option-text">아예 안 나감
+                                    (은둔)</span></div>
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="q-number">5</td>
+                    <td class="question-text">혼자 있다가 아무도 모르게 무슨 일 생길까 봐 무서우세요?</td>
+                    <td>
+                        <div class="options-container">
+                            <div class="option-row"><span class="checkbox"></span><span class="option-text">안 무서움
+                                    (안심)</span></div>
+                            <div class="option-row"><span class="checkbox"></span><span class="option-text">가끔 생각남
+                                    (보통)</span></div>
+                            <div class="option-row"><span class="checkbox"></span><span class="option-text">자주 무서움
+                                    (불안)</span></div>
+                            <div class="option-row"><span class="checkbox"></span><span class="option-text">항상 공포스러움
+                                    (공포)</span></div>
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="q-number">6</td>
+                    <td class="question-text">담당 선생님한테는 속마음 이야기하실 수 있으세요?</td>
+                    <td>
+                        <div class="options-container">
+                            <div class="option-row"><span class="checkbox"></span><span class="option-text">할 수 있음
+                                    (신뢰)</span></div>
+                            <div class="option-row"><span class="checkbox"></span><span class="option-text">어느 정도 함
+                                    (형성)</span></div>
+                            <div class="option-row"><span class="checkbox"></span><span class="option-text">아직 어려움
+                                    (경계)</span></div>
+                            <div class="option-row"><span class="checkbox"></span><span class="option-text">못 하겠음
+                                    (불신)</span></div>
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="q-number">7</td>
+                    <td class="question-text">프로그램 같이 하는 분들 만나면 반가우세요?</td>
+                    <td>
+                        <div class="options-container">
+                            <div class="option-row"><span class="checkbox"></span><span class="option-text">반가움
+                                    (소속감)</span></div>
+                            <div class="option-row"><span class="checkbox"></span><span class="option-text">괜찮음
+                                    (참여)</span></div>
+                            <div class="option-row"><span class="checkbox"></span><span class="option-text">서먹함
+                                    (겉돔)</span></div>
+                            <div class="option-row"><span class="checkbox"></span><span class="option-text">만나기 싫음
+                                    (이탈)</span></div>
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="q-number">8</td>
+                    <td class="question-text">최근에 소리 내서 웃어본 적 있으세요?</td>
+                    <td>
+                        <div class="options-container">
+                            <div class="option-row"><span class="checkbox"></span><span class="option-text">자주 있음
+                                    (즐거움)</span></div>
+                            <div class="option-row"><span class="checkbox"></span><span class="option-text">가끔 있음
+                                    (보통)</span></div>
+                            <div class="option-row"><span class="checkbox"></span><span class="option-text">거의 없음
+                                    (무감동)</span></div>
+                            <div class="option-row"><span class="checkbox"></span><span class="option-text">전혀 없음
+                                    (우울/거부)</span></div>
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="q-number">9</td>
+                    <td class="question-text" style="color: #c0392b; font-weight:bold;">⚠️ 요즘도 죽고 싶다는 생각이 드시나요?</td>
+                    <td>
+                        <div class="options-container">
+                            <div class="option-row"><span class="checkbox"></span><span class="option-text">생각 안 남
+                                    (감소)</span></div>
+                            <div class="option-row"><span class="checkbox"></span><span class="option-text">가끔 남
+                                    (보통)</span></div>
+                            <div class="option-row"><span class="checkbox"></span><span class="option-text"
+                                    style="color:#c0392b;">자주 남 (위험)</span></div>
+                            <div class="option-row"><span class="checkbox"></span><span class="option-text"
+                                    style="color:#c0392b; font-weight:bold;">구체적으로 생각함 (고위험)</span></div>
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="q-number">10</td>
+                    <td class="question-text">프로그램 끝나도 경로당 같은 데 나가보실 생각 있으세요?</td>
+                    <td>
+                        <div class="options-container">
+                            <div class="option-row"><span class="checkbox"></span><span class="option-text">나가고 싶음
+                                    (의지)</span></div>
+                            <div class="option-row"><span class="checkbox"></span><span class="option-text">생각해 보겠음
+                                    (고민)</span></div>
+                            <div class="option-row"><span class="checkbox"></span><span class="option-text">아직 겁남
+                                    (소극)</span></div>
+                            <div class="option-row"><span class="checkbox"></span><span class="option-text">안 나갈 거임
+                                    (거부)</span></div>
+                        </div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+
+
+        <div class="notes-section">
+            <h3>📝 현장 관찰 및 특이사항</h3>
+            <div class="notes-box"></div>
+        </div>
+
+        <div class="footer">
+            <p>노인맞춤돌봄서비스 통합 모니터링 시스템 | 1차 대면 - 특화서비스</p>
+        </div>
+    </div>
+</body>
+
+</html>

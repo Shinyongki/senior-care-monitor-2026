@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>온라인 설문 효과성 조사 서식</title>
+    <style>
+        @page {
+            size: A4 portrait;
+            margin: 12mm;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Malgun Gothic', '맑은 고딕', sans-serif;
+            font-size: 10pt;
+            line-height: 1.5;
+            color: #333;
+            background: #fff;
+            padding: 15px;
+        }
+
+        .form-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            border-bottom: 3px double #8e44ad;
+            padding-bottom: 12px;
+            margin-bottom: 15px;
+        }
+
+        .header h1 {
+            font-size: 18pt;
+            font-weight: bold;
+            color: #8e44ad;
+            margin-bottom: 3px;
+        }
+
+        .header h2 {
+            font-size: 12pt;
+            font-weight: normal;
+            color: #666;
+        }
+
+        .info-section {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 15px;
+            border: 1px solid #8e44ad;
+            padding: 12px;
+            background: #f9f3fc;
+        }
+
+        .info-item {
+            flex: 1 1 30%;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .info-item label {
+            font-weight: bold;
+            min-width: 70px;
+            font-size: 9pt;
+        }
+
+        .info-item .input-box {
+            flex: 1;
+            border-bottom: 1px solid #333;
+            min-height: 20px;
+            padding: 2px 5px;
+        }
+
+        .service-section {
+            margin-bottom: 25px;
+            page-break-inside: avoid;
+        }
+
+        .service-header {
+            padding: 10px 15px;
+            font-size: 12pt;
+            font-weight: bold;
+            margin-bottom: 0;
+            color: white;
+        }
+
+        .service-header.general {
+            background: #2c3e50;
+        }
+
+        .service-header.hospital {
+            background: #c0392b;
+        }
+
+        .service-header.special {
+            background: #27ae60;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th,
+        td {
+            border: 1px solid #333;
+            padding: 8px 10px;
+            text-align: left;
+        }
+
+        th {
+            background: #ecf0f1;
+            font-weight: bold;
+            text-align: center;
+            font-size: 9pt;
+        }
+
+        .question-text {
+            font-size: 9.5pt;
+            line-height: 1.4;
+        }
+
+        .scale-row {
+            display: flex;
+            justify-content: space-around;
+            text-align: center;
+        }
+
+        .scale-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 3px;
+            font-size: 8pt;
+        }
+
+        .checkbox {
+            width: 18px;
+            height: 18px;
+            border: 1px solid #333;
+            display: inline-block;
+        }
+
+        .scale-label {
+            font-size: 7.5pt;
+            color: #666;
+        }
+
+        .notes-section {
+            margin-top: 20px;
+            border: 1px solid #8e44ad;
+            padding: 10px;
+        }
+
+        .notes-section h3 {
+            margin-bottom: 8px;
+            font-size: 10pt;
+            color: #8e44ad;
+        }
+
+        .notes-box {
+            width: 100%;
+            min-height: 50px;
+            border: 1px dashed #999;
+            padding: 8px;
+        }
+
+        .footer {
+            margin-top: 15px;
+            text-align: center;
+            font-size: 8pt;
+            color: #666;
+            border-top: 1px solid #ccc;
+            padding-top: 10px;
+        }
+
+        .legend {
+            margin-bottom: 10px;
+            padding: 8px;
+            background: #f5eef8;
+            border-left: 4px solid #8e44ad;
+            font-size: 8.5pt;
+        }
+
+        @media print {
+            body {
+                padding: 0;
+            }
+
+            .service-section {
+                page-break-inside: avoid;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="form-container">
+        <div class="header">
+            <h1>📊 온라인 설문 효과성 조사</h1>
+        </div>
+
+        <div class="info-section">
+            <div class="info-item">
+                <label>대상자명:</label>
+                <div class="input-box"></div>
+            </div>
+            <div class="info-item">
+                <label>조사일:</label>
+                <div class="input-box"></div>
+            </div>
+            <div class="info-item">
+                <label>시군:</label>
+                <div class="input-box"></div>
+            </div>
+            <div class="info-item">
+                <label>수행기관:</label>
+                <div class="input-box"></div>
+            </div>
+            <div class="info-item">
+                <label>서비스유형:</label>
+                <div class="input-box"></div>
+            </div>
+            <div class="info-item">
+                <label>조사방법:</label>
+                <div class="input-box">□ 온라인 □ 유선 □ 대면</div>
+            </div>
+        </div>
+
+        <!-- 서비스 실태점검 -->
+        <div class="service-section">
+            <div class="service-header" style="background: #34495e;">📊 서비스 실태점검</div>
+            <table>
+                <tbody>
+                    <tr>
+                        <td style="width:30%; font-weight:bold;">서비스 만족도</td>
+                        <td>
+                            <div style="display: flex; gap: 15px;">
+                                <span>□ 매우만족</span>
+                                <span>□ 만족</span>
+                                <span>□ 보통</span>
+                                <span>□ 불만족</span>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="font-weight:bold;">주요 제공 서비스<br><small>(해당 항목 체크)</small></td>
+                        <td>
+                            <div style="display: flex; flex-direction: column; gap: 3px; font-size: 9pt;">
+                                <span>□ 안전지원(안전안부확인, 생활안전점검)</span>
+                                <span>□ 안전지원(정보제공, 말벗_정서지원)</span>
+                                <span>□ 사회참여(문화여가 활동, 자조모임)</span>
+                                <span>□ 생활교육(건강/영양보건교육, 우울예방, 인지활동/치매예방)</span>
+                                <span>□ 일상생활지원(가사지원_식사 청소관리, 이동활동지원)</span>
+                                <span>□ 연계서비스(건강지원, 주거개선, 생활지원 연계)</span>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="font-weight:bold;">방문 빈도</td>
+                        <td>
+                            <div style="display: flex; gap: 15px;">
+                                <span>□ 주 1회</span>
+                                <span>□ 주 2회</span>
+                                <span>□ 주 3회</span>
+                                <span>□ 매일</span>
+                                <span>□ 미제공</span>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="font-weight:bold;">유선 빈도</td>
+                        <td>
+                            <div style="display: flex; gap: 15px;">
+                                <span>□ 주 1회</span>
+                                <span>□ 주 2회</span>
+                                <span>□ 주 3회</span>
+                                <span>□ 매일</span>
+                                <span>□ 미제공</span>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="legend">
+            <strong>📌 응답 안내:</strong> 각 문항에 대해 1점(전혀 그렇지 않다) ~ 5점(매우 그렇다) 중 해당하는 점수에 체크해 주세요.
+        </div>
+
+        <!-- 일반 서비스 -->
+        <div class="service-section">
+            <div class="service-header general">📋 일반 서비스 효과성 (5문항)</div>
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width:55%">문항</th>
+                        <th style="width:45%">응답 (1: 전혀 아님 ~ 5: 매우 그렇다)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="question-text">[외로움] 서비스 후 외로움이 줄어드셨습니까?</td>
+                        <td>
+                            <div class="scale-row">
+                                <div class="scale-item"><span class="checkbox"></span><span
+                                        class="scale-label">1점</span></div>
+                                <div class="scale-item"><span class="checkbox"></span><span
+                                        class="scale-label">2점</span></div>
+                                <div class="scale-item"><span class="checkbox"></span><span
+                                        class="scale-label">3점</span></div>
+                                <div class="scale-item"><span class="checkbox"></span><span
+                                        class="scale-label">4점</span></div>
+                                <div class="scale-item"><span class="checkbox"></span><span
+                                        class="scale-label">5점</span></div>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="question-text">[우울감] 마음이 밝아지고 우울한 기분이 덜해지셨습니까?</td>
+                        <td>
+                            <div class="scale-row">
+                                <div class="scale-item"><span class="checkbox"></span><span
+                                        class="scale-label">1점</span></div>
+                                <div class="scale-item"><span class="checkbox"></span><span
+                                        class="scale-label">2점</span></div>
+                                <div class="scale-item"><span class="checkbox"></span><span
+                                        class="scale-label">3점</span></div>
+                                <div class="scale-item"><span class="checkbox"></span><span
+                                        class="scale-label">4점</span></div>
+                                <div class="scale-item"><span class="checkbox"></span><span
+                                        class="scale-label">5점</span></div>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="question-text">[안전체감] 누군가 나를 지켜본다는 안심이 생기셨습니까?</td>
+                        <td>
+                            <div class="scale-row">
+                                <div class="scale-item"><span class="checkbox"></span><span
+                                        class="scale-label">1점</span></div>
+                                <div class="scale-item"><span class="checkbox"></span><span
+                                        class="scale-label">2점</span></div>
+                                <div class="scale-item"><span class="checkbox"></span><span
+                                        class="scale-label">3점</span></div>
+                                <div class="scale-item"><span class="checkbox"></span><span
+                                        class="scale-label">4점</span></div>
+                                <div class="scale-item"><span class="checkbox"></span><span
+                                        class="scale-label">5점</span></div>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="question-text">[생활안정] 일상생활이 이전보다 안정되셨습니까?</td>
+                        <td>
+                            <div class="scale-row">
+                                <div class="scale-item"><span class="checkbox"></span><span
+                                        class="scale-label">1점</span></div>
+                                <div class="scale-item"><span class="checkbox"></span><span
+                                        class="scale-label">2점</span></div>
+                                <div class="scale-item"><span class="checkbox"></span><span
+                                        class="scale-label">3점</span></div>
+                                <div class="scale-item"><span class="checkbox"></span><span
+                                        class="scale-label">4점</span></div>
+                                <div class="scale-item"><span class="checkbox"></span><span
+                                        class="scale-label">5점</span></div>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="question-text">[삶의만족] 전체적으로 삶이 더 행복해지셨습니까?</td>
+                        <td>
+                            <div class="scale-row">
+                                <div class="scale-item"><span class="checkbox"></span><span
+                                        class="scale-label">1점</span></div>
+                                <div class="scale-item"><span class="checkbox"></span><span
+                                        class="scale-label">2점</span></div>
+                                <div class="scale-item"><span class="checkbox"></span><span
+                                        class="scale-label">3점</span></div>
+                                <div class="scale-item"><span class="checkbox"></span><span
+                                        class="scale-label">4점</span></div>
+                                <div class="scale-item"><span class="checkbox"></span><span
+                                        class="scale-label">5점</span></div>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- 퇴원환자 단기 집중 -->
+        <div class="service-section">
+            <div class="service-header hospital">🏥 퇴원환자 단기 집중 효과성 (5문항)</div>
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width:55%">문항</th>
+                        <th style="width:45%">응답 (1: 전혀 아님 ~ 5: 매우 그렇다)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="question-text">[초기안착] 퇴원 후 집에서의 생활에 잘 적응하셨습니까?</td>
+                        <td>
+                            <div class="scale-row">
+                                <div class="scale-item"><span class="checkbox"></span><span
+                                        class="scale-label">1점</span></div>
+                                <div class="scale-item"><span class="checkbox"></span><span
+                                        class="scale-label">2점</span></div>
+                                <div class="scale-item"><span class="checkbox"></span><span
+                                        class="scale-label">3점</span></div>
+                                <div class="scale-item"><span class="checkbox"></span><span
+                                        class="scale-label">4점</span></div>
+                                <div class="scale-item"><span class="checkbox"></span><span
+                                        class="scale-label">5점</span></div>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="question-text">[복약관리] 약을 정해진 시간에 잘 드시게 되셨습니까?</td>
+                        <td>
+                            <div class="scale-row">
+                                <div class="scale-item"><span class="checkbox"></span><span
+                                        class="scale-label">1점</span></div>
+                                <div class="scale-item"><span class="checkbox"></span><span
+                                        class="scale-label">2점</span></div>
+                                <div class="scale-item"><span class="checkbox"></span><span
+                                        class="scale-label">3점</span></div>
+                                <div class="scale-item"><span class="checkbox"></span><span
+                                        class="scale-label">4점</span></div>
+                                <div class="scale-item"><span class="checkbox"></span><span
+                                        class="scale-label">5점</span></div>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="question-text">[재입원불안] 다시 입원할까 하는 걱정이 줄었습니까?</td>
+                        <td>
+                            <div class="scale-row">
+                                <div class="scale-item"><span class="checkbox"></span><span
+                                        class="scale-label">1점</span></div>
+                                <div class="scale-item"><span class="checkbox"></span><span
+                                        class="scale-label">2점</span></div>
+                                <div class="scale-item"><span class="checkbox"></span><span
+                                        class="scale-label">3점</span></div>
+                                <div class="scale-item"><span class="checkbox"></span><span
+                                        class="scale-label">4점</span></div>
+                                <div class="scale-item"><span class="checkbox"></span><span
+                                        class="scale-label">5점</span></div>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="question-text">[영양/식사] 식사를 규칙적으로 잘 챙겨드시게 되셨습니까?</td>
+                        <td>
+                            <div class="scale-row">
+                                <div class="scale-item"><span class="checkbox"></span><span
+                                        class="scale-label">1점</span></div>
+                                <div class="scale-item"><span class="checkbox"></span><span
+                                        class="scale-label">2점</span></div>
+                                <div class="scale-item"><span class="checkbox"></span><span
+                                        class="scale-label">3점</span></div>
+                                <div class="scale-item"><span class="checkbox"></span><span
+                                        class="scale-label">4점</span></div>
+                                <div class="scale-item"><span class="checkbox"></span><span
+                                        class="scale-label">5점</span></div>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="question-text">[일상회복] 퇴원 전 일상으로 돌아가셨습니까?</td>
+                        <td>
+                            <div class="scale-row">
+                                <div class="scale-item"><span class="checkbox"></span><span
+                                        class="scale-label">1점</span></div>
+                                <div class="scale-item"><span class="checkbox"></span><span
+                                        class="scale-label">2점</span></div>
+                                <div class="scale-item"><span class="checkbox"></span><span
+                                        class="scale-label">3점</span></div>
+                                <div class="scale-item"><span class="checkbox"></span><span
+                                        class="scale-label">4점</span></div>
+                                <div class="scale-item"><span class="checkbox"></span><span
+                                        class="scale-label">5점</span></div>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- 특화서비스 -->
+        <div class="service-section">
+            <div class="service-header special">💚 특화서비스 효과성 (5문항)</div>
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width:55%">문항</th>
+                        <th style="width:45%">응답 (1: 전혀 아님 ~ 5: 매우 그렇다)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="question-text">[고립해소] 혼자라는 느낌이 줄어드셨습니까?</td>
+                        <td>
+                            <div class="scale-row">
+                                <div class="scale-item"><span class="checkbox"></span><span
+                                        class="scale-label">1점</span></div>
+                                <div class="scale-item"><span class="checkbox"></span><span
+                                        class="scale-label">2점</span></div>
+                                <div class="scale-item"><span class="checkbox"></span><span
+                                        class="scale-label">3점</span></div>
+                                <div class="scale-item"><span class="checkbox"></span><span
+                                        class="scale-label">4점</span></div>
+                                <div class="scale-item"><span class="checkbox"></span><span
+                                        class="scale-label">5점</span></div>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="question-text">[정서안정] 마음이 편해지고 삶에 의욕이 생기셨습니까?</td>
+                        <td>
+                            <div class="scale-row">
+                                <div class="scale-item"><span class="checkbox"></span><span
+                                        class="scale-label">1점</span></div>
+                                <div class="scale-item"><span class="checkbox"></span><span
+                                        class="scale-label">2점</span></div>
+                                <div class="scale-item"><span class="checkbox"></span><span
+                                        class="scale-label">3점</span></div>
+                                <div class="scale-item"><span class="checkbox"></span><span
+                                        class="scale-label">4점</span></div>
+                                <div class="scale-item"><span class="checkbox"></span><span
+                                        class="scale-label">5점</span></div>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="question-text">[사회참여] 이웃이나 지역사회와 교류가 늘었습니까?</td>
+                        <td>
+                            <div class="scale-row">
+                                <div class="scale-item"><span class="checkbox"></span><span
+                                        class="scale-label">1점</span></div>
+                                <div class="scale-item"><span class="checkbox"></span><span
+                                        class="scale-label">2점</span></div>
+                                <div class="scale-item"><span class="checkbox"></span><span
+                                        class="scale-label">3점</span></div>
+                                <div class="scale-item"><span class="checkbox"></span><span
+                                        class="scale-label">4점</span></div>
+                                <div class="scale-item"><span class="checkbox"></span><span
+                                        class="scale-label">5점</span></div>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="question-text">[프로그램] 참여하는 프로그램이 도움이 되셨습니까?</td>
+                        <td>
+                            <div class="scale-row">
+                                <div class="scale-item"><span class="checkbox"></span><span
+                                        class="scale-label">1점</span></div>
+                                <div class="scale-item"><span class="checkbox"></span><span
+                                        class="scale-label">2점</span></div>
+                                <div class="scale-item"><span class="checkbox"></span><span
+                                        class="scale-label">3점</span></div>
+                                <div class="scale-item"><span class="checkbox"></span><span
+                                        class="scale-label">4점</span></div>
+                                <div class="scale-item"><span class="checkbox"></span><span
+                                        class="scale-label">5점</span></div>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="question-text">[자존감] 나 자신이 소중하다는 느낌이 드십니까?</td>
+                        <td>
+                            <div class="scale-row">
+                                <div class="scale-item"><span class="checkbox"></span><span
+                                        class="scale-label">1점</span></div>
+                                <div class="scale-item"><span class="checkbox"></span><span
+                                        class="scale-label">2점</span></div>
+                                <div class="scale-item"><span class="checkbox"></span><span
+                                        class="scale-label">3점</span></div>
+                                <div class="scale-item"><span class="checkbox"></span><span
+                                        class="scale-label">4점</span></div>
+                                <div class="scale-item"><span class="checkbox"></span><span
+                                        class="scale-label">5점</span></div>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="notes-section">
+            <h3>📝 추가 의견</h3>
+            <div class="notes-box"></div>
+        </div>
+
+        <div class="footer">
+            <p>노인맞춤돌봄서비스 통합 모니터링 시스템 | 온라인 설문 - 효과성 조사</p>
+        </div>
+    </div>
+</body>
+
+</html>

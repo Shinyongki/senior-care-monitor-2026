@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2026 노인맞춤돌봄 정밀 생활실태 조사</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body{font-family:'Pretendard',sans-serif;background-color:#f1f5f9; color:#1e293b;}
+        .card-select:checked + div {
+            background-color: #ecfdf5;
+            border-color: #059669;
+            color: #047857;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+        .card-select:checked + div .check-icon { opacity: 1; }
+        .fade-in { animation: fadeIn 0.4s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .range-slider::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 20px; height: 20px; border-radius: 50%; background: #10b981; cursor: pointer; }
+    </style>
+</head>
+<body class="py-6 px-4 md:py-12">
+    <div class="max-w-3xl mx-auto">
+        <!-- Header -->
+        <div class="bg-slate-900 rounded-t-3xl p-8 text-white shadow-2xl relative overflow-hidden">
+             <div class="relative z-10">
+                <div class="flex items-center gap-2 mb-4">
+                    <span class="bg-emerald-500 text-white px-2 py-0.5 rounded text-[10px] font-bold tracking-wider">OFFICIAL 2026</span>
+                    <span class="text-slate-400 text-xs">보건복지부 노인맞춤돌봄서비스</span>
+                </div>
+                <h1 class="text-2xl md:text-3xl font-extrabold mb-3 leading-tight">서비스 심층 효과성 및<br/>미충족 욕구(Gap) 조사</h1>
+                <p class="text-slate-400 text-sm max-w-xl leading-relaxed">
+                    단순한 만족도 조사가 아닙니다.<br/>
+                    어르신께 <b>가장 필요한 것(Priority)</b>과 <b>여전히 부족한 것(Gap)</b>을 찾아내어<br/>
+                    실질적인 정책 변화를 만들기 위한 설문입니다.
+                </p>
+            </div>
+            <div class="absolute right-0 top-0 w-64 h-64 bg-emerald-500/10 rounded-full blur-3xl transform translate-x-1/2 -translate-y-1/2"></div>
+        </div>
+
+        <form id="surveyForm" class="bg-white rounded-b-3xl shadow-xl p-6 md:p-10 space-y-12">
+            
+            <!-- Section 1: Basic Info -->
+            <section class="space-y-6">
+                <h2 class="text-lg font-bold text-slate-800 flex items-center gap-2 pb-2 border-b border-slate-100">
+                    <span class="w-6 h-6 rounded-md bg-slate-100 text-slate-600 flex items-center justify-center text-xs">1</span> 기본 정보
+                </h2>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 mb-1">대상자 성명</label>
+                        <input type="text" id="name" required class="w-full p-3 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none font-bold" placeholder="성명 입력">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 mb-1">수행기관명</label>
+                        <input type="text" id="agency" required class="w-full p-3 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none font-bold" placeholder="기관명 입력">
+                    </div>
+                    <div class="grid grid-cols-2 gap-3">
+                         <div>
+                            <label class="block text-xs font-bold text-slate-500 mb-1">성별</label>
+                            <select id="gender" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-lg outline-none font-bold"><option value="여">여성</option><option value="남">남성</option></select>
+                         </div>
+                         <div>
+                            <label class="block text-xs font-bold text-slate-500 mb-1">연령대</label>
+                            <select id="age_group" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-lg outline-none font-bold"><option value="70대">70대</option><option value="80대">80대</option><option value="60대">60대</option><option value="90대 이상">90대 이상</option></select>
+                         </div>
+                    </div>
+                    
+                    <div class="md:col-span-1">
+                        <label class="block text-xs font-bold text-emerald-600 mb-1">서비스 유형 (자동 문항 변경)</label>
+                        <select id="service_type" onchange="updateDynamicQuestions()" class="w-full p-3 bg-emerald-50 border border-emerald-300 text-emerald-900 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none font-bold shadow-sm">
+                            <option value="일반 서비스">일반 서비스</option>
+                            <option value="퇴원환자 단기 집중">퇴원환자 단기 집중</option>
+                            <option value="특화서비스">특화서비스</option>
+                        </select>
+                    </div>
+                    
+                    <!-- Fixed Question Q3 (Q1, Q2 Removed) -->
+                    <div class="md:col-span-2 pt-2">
+                        <label class="block text-xs font-bold text-slate-500 mb-1">Q3. 독거 여부 (혼자 거주하시나요?)</label>
+                        <select id="q3" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-lg outline-none font-bold text-sm">
+                            <option value="네">네 (혼자 산다)</option>
+                            <option value="아니오">아니오 (가족과 함께 산다)</option>
+                        </select>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Section 2: Satisfaction & Performance (Q4~Q13) -->
+            <section class="space-y-6">
+                <div class="flex justify-between items-end border-b border-slate-100 pb-2">
+                    <h2 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+                        <span class="w-6 h-6 rounded-md bg-slate-100 text-slate-600 flex items-center justify-center text-xs">2</span> 정밀 효과성 진단 (Performance)
+                    </h2>
+                    <span id="subtitle" class="text-xs font-bold text-emerald-600">일반 서비스 기준</span>
+                </div>
+                
+                <div class="bg-slate-50 p-5 rounded-xl border border-slate-200">
+                    <p class="text-xs text-slate-500 mb-4 font-medium">※ 각 문항에 대해 1점(전혀 그렇지 않다) ~ 5점(매우 그렇다) 척도로 응답해주세요.</p>
+                    <div id="dynamic_questions_container" class="space-y-5 fade-in">
+                        <!-- Javascript Populated -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- Section 3: Priority & Gap Analysis (IPA) - NEW FEATURE -->
+            <section class="space-y-6">
+                <div class="flex items-center gap-2 border-b border-slate-100 pb-2">
+                     <span class="w-6 h-6 rounded-md bg-amber-100 text-amber-700 flex items-center justify-center text-xs font-bold">3</span> 
+                     <h2 class="text-lg font-bold text-slate-800">심층 니즈 파악 (Priority & Gap)</h2>
+                     <span class="ml-auto text-[10px] bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full font-bold">핵심 분석 구간</span>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Priority Ranking (Forced Choice) -->
+                    <div class="bg-amber-50/50 p-5 rounded-2xl border border-amber-100 hover:border-amber-300 transition-colors">
+                        <label class="block text-sm font-bold text-slate-800 mb-2">Q14. [우선순위] 딱 하나만 선택한다면?</label>
+                        <p class="text-xs text-slate-500 mb-3 leading-relaxed">
+                            제공받는 서비스 중 <b>가장 없어서는 안 될(가장 중요한)</b><br/>단 하나의 서비스를 선택해주세요. (천장효과 방지)
+                        </p>
+                        <select id="q14" class="w-full p-3 bg-white border border-amber-200 rounded-xl focus:ring-2 focus:ring-amber-500 outline-none font-bold text-sm shadow-sm">
+                            <option value="">선택하세요 (필수)</option>
+                            <option value="안전안부확인">1. 안전안부확인 (방문/전화)</option>
+                            <option value="생활교육">2. 생활교육 (건강/영양/체조)</option>
+                            <option value="사회참여">3. 사회참여 (자조모임/친구만들기)</option>
+                            <option value="일상생활지원">4. 일상생활지원 (가사/외출동행)</option>
+                            <option value="연계서비스">5. 연계서비스 (물품후원/주거개선)</option>
+                        </select>
+                    </div>
+
+                    <!-- Gap Analysis (Qualitative) -->
+                    <div class="bg-red-50/50 p-5 rounded-2xl border border-red-100 hover:border-red-300 transition-colors">
+                        <label class="block text-sm font-bold text-slate-800 mb-2">Q15. [결핍발굴] 여전히 아쉬운 점은?</label>
+                        <p class="text-xs text-slate-500 mb-3 leading-relaxed">
+                            전반적으로 만족하시더라도, 생활하면서<br/><b>여전히 해결되지 않아 불편한 점</b>을 구체적으로 적어주세요.
+                        </p>
+                        <input type="text" id="q15" class="w-full p-3 bg-white border border-red-200 rounded-xl focus:ring-2 focus:ring-red-500 outline-none font-medium text-sm shadow-sm" placeholder="예: 주말에는 밥 챙겨먹기가 너무 힘들어요.">
+                    </div>
+                </div>
+            </section>
+
+             <!-- Section 4: Admin Data -->
+             <section class="space-y-4 pt-4 border-t border-slate-200">
+                 <div class="grid grid-cols-2 gap-4">
+                     <div>
+                        <label class="block text-xs font-bold text-slate-500 mb-1">서비스 이용 기간</label>
+                        <select name="service_period" class="w-full p-2 bg-slate-50 border rounded text-sm font-bold"><option value="1년~2년">1년~2년</option><option value="1년 미만">1년 미만</option><option value="3년 이상">3년 이상</option></select>
+                     </div>
+                     <div>
+                        <label class="block text-xs font-bold text-slate-500 mb-1">어르신 한마디 (종합의견)</label>
+                        <input type="text" id="opinion" class="w-full p-2 bg-slate-50 border rounded text-sm" placeholder="자유 기재">
+                    </div>
+                 </div>
+                 
+                 <!-- Hidden inputs for legacy compatibility -->
+                 <input type="hidden" name="time_keep" value="5">
+                 <input type="hidden" name="info_provide" value="5">
+                 <input type="hidden" name="service_area" value="안전지원">
+                 <input type="hidden" name="visited_places" value="">
+                 <input type="hidden" name="risk_check" value="">
+
+                <button type="button" onclick="saveCSV()" class="w-full py-4 bg-slate-900 text-white font-bold text-lg rounded-xl shadow-lg hover:bg-slate-800 hover:shadow-xl transform active:scale-[0.99] transition-all flex items-center justify-center gap-2 mt-6">
+                     <span>설문 완료 및 데이터 추출 (CSV)</span>
+                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                </button>
+             </section>
+        </form>
+        <p class="text-center text-slate-400 text-[10px] mt-6 mb-10">System v2.5 (IPA Enhanced) | © 2026 Senior Care Monitoring</p>
+    </div>
+
+    <script>
+        // Updated to use conversational, elderly-friendly questions
+        const questionsDB = {
+            '일반 서비스': [
+                {id:'q4', label:'Q4. [안전] 선생님 덕분에 혼자 지내실 때 불안하거나 걱정되는 마음이 좀 줄어드셨나요?'},
+                {id:'q5', label:'Q5. [우울] 복지관 모임에 다녀오시면, 집에 혼자 계실 때보다 기분이 더 좋아지시나요?'},
+                {id:'q6', label:'Q6. [건강] 배우신 체조나 건강 수칙을, 수업이 없는 날에도 댁에서 혼자 해보시나요?'},
+                {id:'q7', label:'Q7. [디지털] 이제 스마트폰으로 자녀분께 사진을 보내거나 필요한 걸 찾아보실 수 있나요?'},
+                {id:'q8', label:'Q8. [위기] 갑자기 아프거나 급한 일이 생기면, 바로 연락해서 도움 청할 곳이 있나요?'},
+                {id:'q9', label:'Q9. [만족] 작년 이맘때보다 요즘 하루하루 지내시는 게 좀 더 즐겁고 살만하신가요?'},
+                {id:'q10', label:'Q10. [고독] 선생님과 이런저런 이야기를 나누는 게 외로움을 달래는 데 도움이 되나요?'},
+                {id:'q11', label:'Q11. [기억] 손으로 만들고 머리 쓰는 활동을 하니까, 깜빡깜빡하는 게 좀 덜한 것 같으세요?'},
+                {id:'q12', label:'Q12. [식사] 귀찮으시더라도 끼니를 거르지 않고 제때 챙겨 드시려고 노력하시나요?'},
+                {id:'q13', label:'Q13. [지속] 내년에도 우리 복지관 선생님하고 계속 만나고, 프로그램도 나오고 싶으신가요?'}
+            ],
+            '퇴원환자 단기 집중': [
+                {id:'q4', label:'Q4. [영양] 지원해 드린 도시락(반찬) 덕분에, 식사 준비가 힘들어도 하루 세 끼를 챙겨 드셨나요?'},
+                {id:'q5', label:'Q5. [가사] 청소나 빨래 도움을 받은 덕분에, 몸을 무리하게 쓰지 않고 푹 쉴 수 있었나요?'},
+                {id:'q6', label:'Q6. [동행] 병원 가는 날 선생님이 같이 가주셔서, 빠지지 않고 진료를 잘 받으셨나요?'},
+                {id:'q7', label:'Q7. [투약] 약 드시는 시간을 잊어버리지 않고, 정해진 시간에 잘 챙겨 드셨나요?'},
+                {id:'q8', label:'Q8. [안전] 집안 안전 점검(손잡이 등) 덕분에, 화장실 가거나 움직일 때 덜 무서우신가요?'},
+                {id:'q9', label:'Q9. [불안] 퇴원 직후보다, 다시 아파서 병원에 입원하게 될까 봐 불안해하는 마음이 줄었나요?'},
+                {id:'q10', label:'Q10. [자립] 이제는 선생님 도움 없이도 혼자 식사하거나 씻는 게 가능하신가요?'},
+                {id:'q11', label:'Q11. [가족] 서비스 덕분에 자녀분이나 가족들이 어르신 걱정을 좀 덜 하게 되었나요?'},
+                {id:'q12', label:'Q12. [재가] 요양병원에 가지 않고 계속 우리 집에서 지낼 수 있겠다는 용기가 생기셨나요?'},
+                {id:'q13', label:'Q13. [회복] 퇴원했을 때 걱정했던 것보다, 지금 몸 상태가 훨씬 좋아졌다고 느끼시나요?'}
+            ],
+            '특화서비스': [
+                {id:'q4', label:'Q4. [우울] 서비스를 받고 나서, 이유 없이 슬프거나 울적한 기분이 좀 나아지셨나요?'},
+                {id:'q5', label:'Q5. [희망] 앞으로 살아가는 게 기대되고, 내일이 기다려지는 마음이 생기셨나요?'},
+                {id:'q6', label:'Q6. [관계] 이제는 사람들을 만나거나 어울리는 게 예전보다 덜 불편하신가요?'},
+                {id:'q7', label:'Q7. [외출] 집에만 계시지 않고, 바깥 바람 쐬러 나가시는 일이 더 많아지셨나요?'},
+                {id:'q8', label:'Q8. [공포] 혼자 있다가 아무도 모르게 무슨 일이 생길까 봐 무서웠던 마음이 좀 줄었나요?'},
+                {id:'q9', label:'Q9. [신뢰] 담당 선생님에게는 속마음이나 힘든 이야기를 털어놓으실 수 있나요?'},
+                {id:'q10', label:'Q10. [소속] 프로그램 같이 하는 분들을 만나면 반갑고, 우리라는 느낌이 드시나요?'},
+                {id:'q11', label:'Q11. [정서] 최근에 소리 내서 웃거나, 즐겁다고 느껴본 적이 있으신가요?'},
+                {id:'q12', label:'Q12. [생명] 죽고 싶다는 생각보다는, 잘 살고 싶다는 생각이 더 많이 드시나요?'},
+                {id:'q13', label:'Q13. [의지] 프로그램이 끝나도, 경로당이나 다른 모임에 나가보실 용기가 생기셨나요?'}
+            ]
+        };
+        
+        function updateDynamicQuestions(){
+            const type = document.getElementById('service_type').value;
+            const container = document.getElementById('dynamic_questions_container');
+            document.getElementById('subtitle').innerText = type + ' 기준';
+            
+            container.innerHTML = '';
+            
+            (questionsDB[type] || questionsDB['일반 서비스']).forEach((q, idx) => {
+                const div = document.createElement('div');
+                div.className = "flex items-center justify-between p-3 bg-white rounded-lg border border-slate-100 shadow-sm";
+                div.innerHTML = `
+                    <label class="text-xs font-bold text-slate-700 flex-1 mr-4 leading-relaxed">${q.label}</label>
+                    <div class="flex items-center gap-1 shrink-0">
+                        <select id="${q.id}" class="p-1.5 bg-slate-50 border border-slate-200 rounded text-xs font-bold text-center focus:ring-1 focus:ring-emerald-500 outline-none">
+                            <option value="5">5점 (매우 그렇다)</option>
+                            <option value="4">4점 (그렇다)</option>
+                            <option value="3">3점 (보통)</option>
+                            <option value="2">2점 (아니다)</option>
+                            <option value="1">1점 (전혀 아니다)</option>
+                        </select>
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        window.onload = updateDynamicQuestions;
+
+        function getValue(id){return document.getElementById(id)?document.getElementById(id).value:''}
+        
+        function saveCSV(){
+            if(!getValue('name') || !getValue('agency')){ alert('필수 정보를 입력하세요.'); return; }
+            if(!getValue('q14')){ alert('Q14. 최우선 서비스를 선택해주세요.'); return; }
+
+            // Construct CSV Row (Removed Q1, Q2 columns)
+            const d=[
+                getValue('name'),getValue('gender'),getValue('age_group'),getValue('agency'),getValue('service_type'),
+                document.querySelector('select[name="service_period"]').value, '5','5','안전지원', // Legacy fillers
+                getValue('q3'), // Now directly Q3
+                getValue('q4'),getValue('q5'),getValue('q6'),getValue('q7'),getValue('q8'),getValue('q9'),getValue('q10'),getValue('q11'),getValue('q12'),getValue('q13'),
+                getValue('q14'), // Priority
+                getValue('q15'), // Gap
+                '','',getValue('opinion')
+            ];
+            
+            const c="﻿"+d.join(',')+"\n";
+            const b=new Blob([c],{type:'text/csv;charset=utf-8;'});
+            const l=document.createElement("a");
+            l.href=URL.createObjectURL(b);
+            l.download=getValue('name')+"_정밀설문.csv";
+            document.body.appendChild(l);
+            l.click();
+            document.body.removeChild(l);
+        }
+    </script>
+</body>
+</html>

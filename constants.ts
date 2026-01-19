@@ -24,12 +24,12 @@ export const REGION_AGENCY_MAP: AgencyMap = {
 
 export const AUTHORS = ["신용기", "이연숙", "이정혜", "권기현", "박지영"];
 
-export const AUTHOR_REGION_MAP: { [key: string]: string } = {
-  "신용기": "통영시",
-  "이연숙": "하동군",
-  "이정혜": "거창군",
-  "권기현": "합천군",
-  "박지영": "창원시"
+export const AUTHOR_REGION_MAP: { [key: string]: string[] } = {
+  "신용기": ["통영시", "하동군", "거창군", "합천군", "함안군"],
+  "이정혜": ["창원시", "함양군"],
+  "박지영": ["거제시", "고성군", "진주시"],
+  "이연숙": ["김해시", "남해군", "밀양시", "의령군"],
+  "권기현": ["사천시", "산청군", "양산시", "창녕군"]
 };
 
 export const RISK_FACTORS = [

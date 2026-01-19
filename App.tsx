@@ -10,7 +10,7 @@ import { sendToGoogleSheet } from './utils/googleSheetApi';
 // Icons
 import {
   Phone, Users, ClipboardCheck, Activity,
-  Save, Copy, Settings, CloudUpload, MessageSquare
+  Save, Copy, Settings, CloudUpload, MessageSquare, ExternalLink
 } from 'lucide-react';
 
 // Components
@@ -619,6 +619,14 @@ ${formData.interviewer_opinion || '(작성되지 않음)'}`;
               })}
             </nav>
             <button
+              onClick={() => window.open('https://docs.google.com/spreadsheets/d/1SKF4zhkkosarkzaWu2idF_qqzZBdG-h47K46OXMBdMo/edit?gid=1522504568#gid=1522504568', '_blank')}
+              className="p-2 bg-green-500/80 hover:bg-green-500 rounded-lg transition-colors text-white flex items-center gap-1.5"
+              title="구글 시트 열기"
+            >
+              <ExternalLink size={16} />
+              <span className="text-xs font-bold hidden md:inline">시트</span>
+            </button>
+            <button
               onClick={() => setSettingsVisible(true)}
               className="p-2 bg-white/20 hover:bg-white/30 rounded-lg transition-colors text-white"
               title="연동 설정"
@@ -685,7 +693,8 @@ ${formData.interviewer_opinion || '(작성되지 않음)'}`;
               updateField={updateField}
               hypotheses={hypotheses}
               setHypotheses={setHypotheses}
-              candidates={candidates} // Pass candidates for selection
+              candidates={candidates}
+              setCandidates={setCandidates}
               showToast={showToast}
             />
           )}

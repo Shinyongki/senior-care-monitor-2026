@@ -6,48 +6,48 @@ import { sendToGoogleSheet } from '../../utils/googleSheetApi';
 import { Target, Users, AlertCircle, UploadCloud, RefreshCw, Download, Database, FileCode, CheckCircle2, FileSpreadsheet, FileText, ArrowRight, Lightbulb, PieChart, BarChart3, Search } from 'lucide-react';
 
 interface OnlineModeProps {
-  formData: FormDataState;
-  updateField: (field: keyof FormDataState, value: any) => void;
-  hypotheses: Hypothesis[];
-  setHypotheses: React.Dispatch<React.SetStateAction<Hypothesis[]>>;
-  candidates: Candidate[];
-  setCandidates: React.Dispatch<React.SetStateAction<Candidate[]>>;
-  showToast: (msg: string, type?: 'success' | 'error' | 'info') => void;
-  scriptUrl: string; // Passed from App for batch upload
+    formData: FormDataState;
+    updateField: (field: keyof FormDataState, value: any) => void;
+    hypotheses: Hypothesis[];
+    setHypotheses: React.Dispatch<React.SetStateAction<Hypothesis[]>>;
+    candidates: Candidate[];
+    setCandidates: React.Dispatch<React.SetStateAction<Candidate[]>>;
+    showToast: (msg: string, type?: 'success' | 'error' | 'info') => void;
+    scriptUrl: string; // Passed from App for batch upload
 }
 
-const OnlineMode: React.FC<OnlineModeProps> = ({ 
-  formData, updateField, hypotheses, setHypotheses, candidates, setCandidates, showToast, scriptUrl 
+const OnlineMode: React.FC<OnlineModeProps> = ({
+    formData, updateField, hypotheses, setHypotheses, candidates, setCandidates, showToast, scriptUrl
 }) => {
-  
-  const [isProcessing, setIsProcessing] = useState(false);
-  const [progress, setProgress] = useState({ current: 0, total: 0 });
-  const [policyMemo, setPolicyMemo] = useState('');
 
-  // 1. CSV Template Download (Updated Headers with Priority & Gap Analysis, Removed Q1/Q2)
-  const downloadTemplate = () => {
-    const bom = '\uFEFF';
-    // Removed Q1, Q2. Q3 is now the first question column after Satisfaction Areas.
-    // Index: ... Satisfaction(8), Q3(9), Q4(10) ...
-    let csvContent = bom + "대상자명,성별,연령대,수행기관,서비스유형,서비스이용기간,시간준수(5점),정보제공(5점),만족영역(중복가능),Q3.독거여부(네/아니오),Q4,Q5,Q6,Q7,Q8,Q9,Q10,Q11,Q12,Q13,Q14(최우선서비스),Q15(미충족욕구),방문장소(중복),자가진단체크리스트(중복),어르신한마디\n";
-    
-    // Sample Data Updated (Removed 75세, 아파트 etc.)
-    csvContent += `홍길동,남,70대,거제노인통합지원센터,일반 서비스,1년~2년,4,4,안전지원|사회참여,네,5,5,5,5,5,5,5,5,5,5,안전안부확인,밤에 아플 때 이동 수단이 없음,경로당/복지관|시장/마트,미끄러운 바닥|무릎 통증,감사합니다\n`;
-    csvContent += `김철수,여,80대,김해시종합사회복지관,퇴원환자 단기 집중,3년 이상,5,5,일상지원,네,3,3,3,3,3,3,3,3,3,3,병원동행,주말에는 도시락이 안 와서 힘듦,의료기관(병원),약 먹는 것 깜빡함|입맛 없음,잘 돌봐주셔서 감사해요\n`;
+    const [isProcessing, setIsProcessing] = useState(false);
+    const [progress, setProgress] = useState({ current: 0, total: 0 });
+    const [policyMemo, setPolicyMemo] = useState('');
 
-    const encodedUri = encodeURI("data:text/csv;charset=utf-8," + csvContent);
-    const link = document.createElement("a");
-    link.setAttribute("href", encodedUri);
-    link.setAttribute("download", `온라인설문_IPA분석용_${new Date().toISOString().slice(0, 10)}.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    showToast('📥 [IPA 분석용] CSV 데이터 양식이 다운로드되었습니다.', 'success');
-  };
+    // 1. CSV Template Download (Updated Headers with Priority & Gap Analysis, Removed Q1/Q2)
+    const downloadTemplate = () => {
+        const bom = '\uFEFF';
+        // Removed Q1, Q2. Q3 is now the first question column after Satisfaction Areas.
+        // Index: ... Satisfaction(8), Q3(9), Q4(10) ...
+        let csvContent = bom + "대상자명,성별,연령대,수행기관,서비스유형,서비스이용기간,시간준수(5점),정보제공(5점),만족영역(중복가능),Q3.독거여부(네/아니오),Q4,Q5,Q6,Q7,Q8,Q9,Q10,Q11,Q12,Q13,Q14(최우선서비스),Q15(미충족욕구),방문장소(중복),자가진단체크리스트(중복),어르신한마디\n";
 
-  // 2. Generate Standalone HTML Form with Advanced Questions (Priority & Gap)
-  const downloadSurveyForm = () => {
-    const fullHtml = `<!DOCTYPE html>
+        // Sample Data Updated (Removed 75세, 아파트 etc.)
+        csvContent += `홍길동,남,70대,거제노인통합지원센터,일반 서비스,1년~2년,4,4,안전지원|사회참여,네,5,5,5,5,5,5,5,5,5,5,안전안부확인,밤에 아플 때 이동 수단이 없음,경로당/복지관|시장/마트,미끄러운 바닥|무릎 통증,감사합니다\n`;
+        csvContent += `김철수,여,80대,김해시종합사회복지관,퇴원환자 단기 집중,3년 이상,5,5,일상지원,네,3,3,3,3,3,3,3,3,3,3,병원동행,주말에는 도시락이 안 와서 힘듦,의료기관(병원),약 먹는 것 깜빡함|입맛 없음,잘 돌봐주셔서 감사해요\n`;
+
+        const encodedUri = encodeURI("data:text/csv;charset=utf-8," + csvContent);
+        const link = document.createElement("a");
+        link.setAttribute("href", encodedUri);
+        link.setAttribute("download", `온라인설문_IPA분석용_${new Date().toISOString().slice(0, 10)}.csv`);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        showToast('📥 [IPA 분석용] CSV 데이터 양식이 다운로드되었습니다.', 'success');
+    };
+
+    // 2. Generate Standalone HTML Form with Advanced Questions (Priority & Gap)
+    const downloadSurveyForm = () => {
+        const fullHtml = `<!DOCTYPE html>
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
@@ -317,390 +317,404 @@ const OnlineMode: React.FC<OnlineModeProps> = ({
 </body>
 </html>`;
 
-    const blob = new Blob([fullHtml], { type: 'text/html' });
-    const link = document.createElement("a");
-    link.href = URL.createObjectURL(blob);
-    link.download = "2026_노인맞춤돌봄_정밀설문지(IPA).html";
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    showToast('🚀 [IPA 고도화] 정밀 설문지(HTML)가 생성되었습니다.', 'success');
-  };
-
-  // 3. Risk Conditions Logic (Maintained)
-  const riskConditions: Record<string, string[]> = {
-    'Q3': ['네'], 'Q4': ['1', '2'], 'Q5': ['1', '2'], 'Q6': ['1', '2'], 
-    'Q7': ['1', '2'], 'Q8': ['1', '2'], 'Q9': ['1', '2'], 'Q10': ['1', '2'], 
-    'Q11': ['1', '2'], 'Q12': ['1', '2'], 'Q13': ['1', '2']
-  };
-
-  // 4. Hypothesis Verification Logic
-  const verifyRow = (row: any, hypothesis: Hypothesis): VerificationData | null => {
-    if (hypothesis.effectQ && hypothesis.effectQ.startsWith('Step3_Q')) {
-        const qIndex = parseInt(hypothesis.effectQ.replace('Step3_Q', ''));
-        const val = parseInt(row['q' + qIndex]) || 0;
-        
-        const outcomeMatch = val >= 4 ? '발생함' : '발생안함';
-        const factorMatch = '해당함'; 
-
-        let pattern = 'partial';
-        if (val >= 4) pattern = 'support'; 
-        else if (val <= 2) pattern = 'mismatch_success'; 
-        else pattern = 'control';
-
-        return { respondentName: row.name, factorMatch, outcomeMatch, pattern, timestamp: new Date().toISOString() };
-    }
-    return null;
-  };
-
-  // 5. File Upload & Batch Processing (Including New Priority/Gap Logic)
-  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    if (!scriptUrl) {
-        showToast('⚠️ 설정에서 구글 시트 URL을 먼저 등록해주세요.', 'error');
-        return;
-    }
-
-    const reader = new FileReader();
-    reader.onload = async (event) => {
-        const text = event.target?.result as string;
-        await processBatch(text);
+        const blob = new Blob([fullHtml], { type: 'text/html' });
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+        link.download = "2026_노인맞춤돌봄_정밀설문지(IPA).html";
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        showToast('🚀 [IPA 고도화] 정밀 설문지(HTML)가 생성되었습니다.', 'success');
     };
-    reader.readAsText(file, 'UTF-8');
-    e.target.value = ''; 
-  };
 
-  const processBatch = async (csvText: string) => {
-    setIsProcessing(true);
-    const lines = csvText.split('\n');
-    const validRows: any[] = [];
+    // 3. Risk Conditions Logic (Maintained)
+    const riskConditions: Record<string, string[]> = {
+        'Q3': ['네'], 'Q4': ['1', '2'], 'Q5': ['1', '2'], 'Q6': ['1', '2'],
+        'Q7': ['1', '2'], 'Q8': ['1', '2'], 'Q9': ['1', '2'], 'Q10': ['1', '2'],
+        'Q11': ['1', '2'], 'Q12': ['1', '2'], 'Q13': ['1', '2']
+    };
 
-    // Updated Column Mapping after Q1, Q2 removal
-    // 0:Name, 1:Gender, 2:AgeGroup, 3:Agency, 4:ServiceType, 5:Period, 6:Time, 7:Info, 8:Area
-    // 9:Q3, 10:Q4 ... 19:Q13
-    // 20:Q14(Priority), 21:Q15(Gap)
-    for (let i = 1; i < lines.length; i++) {
-        const line = lines[i].trim();
-        if (!line) continue;
-        const cols = line.split(',').map(c => c.replace(/^"|"$/g, '').trim());
-        if (cols.length < 18) continue; 
+    // 4. Hypothesis Verification Logic
+    const verifyRow = (row: any, hypothesis: Hypothesis): VerificationData | null => {
+        if (hypothesis.effectQ && hypothesis.effectQ.startsWith('Step3_Q')) {
+            const qIndex = parseInt(hypothesis.effectQ.replace('Step3_Q', ''));
+            const val = parseInt(row['q' + qIndex]) || 0;
 
-        validRows.push({
-            name: cols[0], gender: cols[1], age_group: cols[2], agency: cols[3], service_type: cols[4],
-            service_period: cols[5], time_keep: cols[6], info_provide: cols[7], service_area: cols[8],
-            // Shifted Indices
-            q3: cols[9], 
-            q4: cols[10], q5: cols[11], q6: cols[12], q7: cols[13], q8: cols[14], q9: cols[15], q10: cols[16],
-            q11: cols[17], q12: cols[18], q13: cols[19],
-            // New Fields
-            priority_service: cols[20] || '', // Q14
-            gap_need: cols[21] || '', // Q15
-            
-            visited_places: cols[22], risk_check: cols[23], opinion: cols[24]
-        });
-    }
+            const outcomeMatch = val >= 4 ? '발생함' : '발생안함';
+            const factorMatch = '해당함';
 
-    setProgress({ current: 0, total: validRows.length });
+            let pattern = 'partial';
+            if (val >= 4) pattern = 'support';
+            else if (val <= 2) pattern = 'mismatch_success';
+            else pattern = 'control';
 
-    const updatedHypotheses = [...hypotheses];
-    let successCount = 0;
-    const newCandidates: Candidate[] = [];
+            return { respondentName: row.name, factorMatch, outcomeMatch, pattern, timestamp: new Date().toISOString() };
+        }
+        return null;
+    };
 
-    for (let i = 0; i < validRows.length; i++) {
-        const row = validRows[i];
-        
-        // --- 1. Hypothesis Verification ---
-        let isMismatch = false;
-        updatedHypotheses.forEach(h => {
-            if (h.sendToStep2) {
-                const verification = verifyRow(row, h);
-                if (verification) {
-                    if (!h.verificationData) h.verificationData = [];
-                    h.verificationData.push(verification);
-                    if (verification.pattern === 'mismatch_success') isMismatch = true;
-                }
-            }
-        });
+    // 5. File Upload & Batch Processing (Including New Priority/Gap Logic)
+    const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
 
-        // --- 2. Candidate Extraction (Advanced) ---
-        // Gap Analysis (Q15): If they wrote something specifically negative
-        const hasGap = row.gap_need && row.gap_need.length > 5;
-        
-        // Priority Mismatch (Q14): If their priority service has a low score
-        // Mapping Q14 text to Question ID (Simplified logic)
-        let priorityScore = 5;
-        if (row.priority_service.includes('안전')) priorityScore = parseInt(row.q4) || 0;
-        if (row.priority_service.includes('사회')) priorityScore = parseInt(row.q5) || 0;
-        if (row.priority_service.includes('교육')) priorityScore = parseInt(row.q6) || 0;
-        
-        const isPriorityRisk = priorityScore <= 2;
-
-        const currentYear = new Date().getFullYear();
-        // Fallback for Age since Q1 is removed: use age_group
-        const ageBase = parseInt(row.age_group) || 70;
-        const birthYear = String(currentYear - (ageBase + 5)); // Approx mid-range
-
-        if (!candidates.find(c => c.name === row.name) && !newCandidates.find(c => c.name === row.name)) {
-            if (isPriorityRisk) {
-                newCandidates.push({
-                    id: Date.now() + Math.random(), name: row.name, gender: row.gender, birth_year: birthYear, agency: row.agency,
-                    reason: `최우선 서비스(${row.priority_service}) 만족도 저조 (점수:${priorityScore})`,
-                    reasonType: '특이사례'
-                });
-            } else if (hasGap) {
-                newCandidates.push({
-                    id: Date.now() + Math.random(), name: row.name, gender: row.gender, birth_year: birthYear, agency: row.agency,
-                    reason: `미충족 욕구(Gap) 식별: "${row.gap_need.substring(0, 15)}..."`,
-                    reasonType: '특이사례'
-                });
-            } else if (isMismatch) {
-                 newCandidates.push({
-                    id: Date.now() + Math.random(), name: row.name, gender: row.gender, birth_year: birthYear, agency: row.agency,
-                    reason: '가설 불일치 (회복탄력성 우수 추정)',
-                    reasonType: '데이터불일치'
-                });
-            }
+        if (!scriptUrl) {
+            showToast('⚠️ 설정에서 구글 시트 URL을 먼저 등록해주세요.', 'error');
+            return;
         }
 
-        // --- 3. Google Sheet Upload (Expanded) ---
-        const formPayload: any = {
-            mon_method: '온라인설문',
-            survey_date: new Date().toISOString().split('T')[0],
-            author: '일괄업로드',
-            name: row.name,
-            gender: row.gender,
-            age_group: row.age_group,
-            agency: row.agency,
-            service_type: row.service_type,
-            service_duration: row.service_period,
-            interview_answers: {
-                q_priority: row.priority_service, // New
-                q_gap: row.gap_need, // New
-                q4: row.q4, q5: row.q5, q6: row.q6, q7: row.q7, q8: row.q8, q9: row.q9, q10: row.q10, q11: row.q11, q12: row.q12, q13: row.q13
-            },
-            service_satisfaction_areas: [], 
-            outdoor_frequency: '', 
-            visited_places: [], 
-            online_opinion: `[Priority:${row.priority_service}] ${row.opinion}`
+        const reader = new FileReader();
+        reader.onload = async (event) => {
+            const text = event.target?.result as string;
+            await processBatch(text);
         };
+        reader.readAsText(file, 'UTF-8');
+        e.target.value = '';
+    };
 
-        try {
-            await sendToGoogleSheet(scriptUrl, formPayload as FormDataState);
-            successCount++;
-        } catch (err) { console.error(err); }
+    const processBatch = async (csvText: string) => {
+        setIsProcessing(true);
+        const lines = csvText.split('\n');
+        const validRows: any[] = [];
 
-        setProgress({ current: i + 1, total: validRows.length });
-        if (i % 5 === 0) await new Promise(r => setTimeout(r, 10));
-    }
+        // Updated Column Mapping after Q1, Q2 removal
+        // 0:Name, 1:Gender, 2:AgeGroup, 3:Agency, 4:ServiceType, 5:Period, 6:Time, 7:Info, 8:Area
+        // 9:Q3, 10:Q4 ... 19:Q13
+        // 20:Q14(Priority), 21:Q15(Gap)
+        for (let i = 1; i < lines.length; i++) {
+            const line = lines[i].trim();
+            if (!line) continue;
+            const cols = line.split(',').map(c => c.replace(/^"|"$/g, '').trim());
+            if (cols.length < 18) continue;
 
-    setHypotheses(updatedHypotheses);
-    if (newCandidates.length > 0) setCandidates(prev => [...prev, ...newCandidates]);
-    
-    setIsProcessing(false);
-    showToast(`✅ ${successCount}건 처리 완료. IPA 분석 기반 후보군 ${newCandidates.length}명이 추출되었습니다.`, 'success');
-  };
+            validRows.push({
+                name: cols[0], gender: cols[1], age_group: cols[2], agency: cols[3], service_type: cols[4],
+                service_period: cols[5], time_keep: cols[6], info_provide: cols[7], service_area: cols[8],
+                // Shifted Indices
+                q3: cols[9],
+                q4: cols[10], q5: cols[11], q6: cols[12], q7: cols[13], q8: cols[14], q9: cols[15], q10: cols[16],
+                q11: cols[17], q12: cols[18], q13: cols[19],
+                // New Fields
+                priority_service: cols[20] || '', // Q14
+                gap_need: cols[21] || '', // Q15
 
-  // 6. IPA Policy Generation
-  const generatePolicy = () => {
-    const verified = hypotheses.filter(h => h.verificationData && h.verificationData.length > 0);
-    
-    if (verified.length === 0) {
-      showToast('⚠️ 분석할 데이터가 없습니다.', 'error');
-      return;
-    }
-    
-    // Simulating IPA Analysis Aggregation
-    let text = `[2026 노인맞춤돌봄 전략 정책 제언 - IPA 분석 기반]\n`;
-    text += `■ 분석 개요: N=${verified.reduce((acc, h) => acc + (h.verificationData?.length || 0), 0)}명 대상 정밀 분석\n\n`;
-    
-    text += `1. 🚀 중점 개선 영역 (Concentrate Here)\n`;
-    text += `   - 정의: 어르신들이 '매우 중요(Priority)'하다고 선택했으나, 만족도는 평균 이하인 항목\n`;
-    text += `   - 식별: [안전안부확인], [병원동행지원]\n`;
-    text += `   - 제언: "안전 확인은 생존과 직결된 최우선 욕구임에도 만족도가 정체되어 있음. ICT 장비 도입보다 '대면 접촉' 빈도를 늘리는 예산 편성이 시급함."\n\n`;
+                visited_places: cols[22], risk_check: cols[23], opinion: cols[24]
+            });
+        }
 
-    text += `2. ✨ 유지 강화 영역 (Keep Up the Good Work)\n`;
-    text += `   - 정의: 중요도와 만족도가 모두 높은 항목 (성공 요인)\n`;
-    text += `   - 식별: [생활교육(건강체조)], [말벗서비스]\n`;
-    text += `   - 제언: "현재의 생활지원사 매칭 시스템이 정서적 안정에 기여하고 있음. 우수 사례로 선정하여 매뉴얼 표준화 필요."\n\n`;
+        setProgress({ current: 0, total: validRows.length });
 
-    text += `3. 💡 미충족 욕구(Gap) 발굴\n`;
-    text += `   - 정량적 만족도 뒤에 숨겨진 정성적 결핍 분석 (Q15)\n`;
-    text += `   - 주요 키워드: '주말 식사', '야간 응급 상황', '남자 어르신 요리 교실'\n`;
-    text += `   - 제언: "평일 주간 중심의 서비스를 '주말/야간' 공백을 메우는 형태로 확장해야 함 (지역사회 자원 연계 필수)."\n\n`;
+        const updatedHypotheses = [...hypotheses];
+        let successCount = 0;
+        const newCandidates: Candidate[] = [];
 
-    text += `4. ⚠️ 과잉 투자 주의 (Possible Overkill)\n`;
-    text += `   - 정의: 중요도는 낮은데 만족도만 과하게 높은 항목\n`;
-    text += `   - 식별: [단순 물품 후원]\n`;
-    text += `   - 제언: "단순 물품 전달보다는 관계 중심 프로그램으로 예산을 재배정하는 효율화 전략 필요."`;
+        for (let i = 0; i < validRows.length; i++) {
+            const row = validRows[i];
 
-    setPolicyMemo(text);
-    showToast('✨ IPA 매트릭스 기반의 전략적 정책 보고서가 생성되었습니다.', 'success');
-  };
+            // --- 1. Hypothesis Verification ---
+            let isMismatch = false;
+            updatedHypotheses.forEach(h => {
+                if (h.sendToStep2) {
+                    const verification = verifyRow(row, h);
+                    if (verification) {
+                        if (!h.verificationData) h.verificationData = [];
+                        h.verificationData.push(verification);
+                        if (verification.pattern === 'mismatch_success') isMismatch = true;
+                    }
+                }
+            });
 
-  const confirmPolicy = () => {
-      setHypotheses(prev => prev.map(h => h.verificationData && h.verificationData.length > 0 ? { ...h, status: 'confirmed' } : h));
-      navigator.clipboard.writeText(policyMemo);
-      showToast('✅ 정책 제언 확정 & 복사 완료.', 'success');
-  };
+            // --- 2. Candidate Extraction (Advanced) ---
+            // Gap Analysis (Q15): If they wrote something specifically negative
+            const hasGap = row.gap_need && row.gap_need.length > 5;
 
-  const globalHypotheses = hypotheses.filter(h => h.sendToStep2);
+            // Priority Mismatch (Q14): If their priority service has a low score
+            // Mapping Q14 text to Question ID (Simplified logic)
+            let priorityScore = 5;
+            if (row.priority_service.includes('안전')) priorityScore = parseInt(row.q4) || 0;
+            if (row.priority_service.includes('사회')) priorityScore = parseInt(row.q5) || 0;
+            if (row.priority_service.includes('교육')) priorityScore = parseInt(row.q6) || 0;
 
-  return (
-    <div className="space-y-6 animate-fade-in">
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-      
-        {/* Left: Bulk Upload Panel */}
-        <div className="lg:col-span-2 space-y-6">
-            <Card title="📤 데이터 일괄 처리 (Batch Processing)" color="green" className="h-full">
-                {/* Download Buttons */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                    <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 hover:border-emerald-300 transition-colors group">
-                        <div className="flex items-center gap-3 mb-2">
-                            <div className="bg-white p-2 rounded-full text-emerald-600 shadow-sm border border-emerald-100"><FileCode size={20}/></div>
-                            <h4 className="font-bold text-slate-700">1. 정밀 설문지 배포</h4>
-                        </div>
-                        <p className="text-xs text-slate-500 mb-3 leading-relaxed">
-                            IPA 분석(우선순위, Gap) 문항이 포함된<br/>고도화된 설문지(HTML)를 생성합니다.
-                        </p>
-                        <button onClick={downloadSurveyForm} className="w-full py-2 bg-white border border-emerald-500 text-emerald-700 rounded-lg text-xs font-bold hover:bg-emerald-50 flex items-center justify-center gap-2">
-                            <Download size={14}/> 정밀 설문지(HTML) 다운로드
-                        </button>
-                    </div>
+            const isPriorityRisk = priorityScore <= 2;
 
-                    <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 hover:border-emerald-300 transition-colors group">
-                        <div className="flex items-center gap-3 mb-2">
-                            <div className="bg-white p-2 rounded-full text-emerald-600 shadow-sm border border-emerald-100"><FileSpreadsheet size={20}/></div>
-                            <h4 className="font-bold text-slate-700">2. 분석용 양식 다운로드</h4>
-                        </div>
-                        <p className="text-xs text-slate-500 mb-3 leading-relaxed">
-                            우선순위(Q14) 및 미충족욕구(Q15) 컬럼이<br/>추가된 최신 CSV 양식입니다.
-                        </p>
-                        <button onClick={downloadTemplate} className="w-full py-2 bg-white border border-slate-300 text-slate-600 rounded-lg text-xs font-bold hover:bg-slate-100 flex items-center justify-center gap-2">
-                            <Download size={14}/> CSV 양식(Template) 다운로드
-                        </button>
-                    </div>
-                </div>
+            const currentYear = new Date().getFullYear();
+            // Fallback for Age since Q1 is removed: use age_group
+            const ageBase = parseInt(row.age_group) || 70;
+            const birthYear = String(currentYear - (ageBase + 5)); // Approx mid-range
 
-                <div className="space-y-6">
-                    {!isProcessing ? (
-                        <div className="border-2 border-dashed border-emerald-200 rounded-xl p-10 text-center hover:border-emerald-400 hover:bg-emerald-50/30 transition-all cursor-pointer relative group">
-                            <input type="file" accept=".csv" onChange={handleFileUpload} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"/>
-                            <div className="flex flex-col items-center gap-3 text-slate-400 group-hover:text-emerald-600">
-                                <div className="bg-emerald-50 p-4 rounded-full group-hover:bg-emerald-100 transition-colors text-emerald-500">
-                                    <UploadCloud size={40} />
+            if (!candidates.find(c => c.name === row.name) && !newCandidates.find(c => c.name === row.name)) {
+                if (isPriorityRisk) {
+                    newCandidates.push({
+                        id: Date.now() + Math.random(), name: row.name, gender: row.gender, birth_year: birthYear, agency: row.agency,
+                        reason: `최우선 서비스(${row.priority_service}) 만족도 저조 (점수:${priorityScore})`,
+                        reasonType: '특이사례'
+                    });
+                } else if (hasGap) {
+                    newCandidates.push({
+                        id: Date.now() + Math.random(), name: row.name, gender: row.gender, birth_year: birthYear, agency: row.agency,
+                        reason: `미충족 욕구(Gap) 식별: "${row.gap_need.substring(0, 15)}..."`,
+                        reasonType: '특이사례'
+                    });
+                } else if (isMismatch) {
+                    newCandidates.push({
+                        id: Date.now() + Math.random(), name: row.name, gender: row.gender, birth_year: birthYear, agency: row.agency,
+                        reason: '가설 불일치 (회복탄력성 우수 추정)',
+                        reasonType: '데이터불일치'
+                    });
+                }
+            }
+
+            // --- 3. Google Sheet Upload (Expanded) ---
+            const formPayload: any = {
+                mon_method: '온라인설문',
+                survey_date: new Date().toISOString().split('T')[0],
+                author: '일괄업로드',
+                name: row.name,
+                gender: row.gender,
+                age_group: row.age_group,
+                agency: row.agency,
+                service_type: row.service_type,
+                service_duration: row.service_period,
+                interview_answers: {
+                    q_priority: row.priority_service, // New
+                    q_gap: row.gap_need, // New
+                    q4: row.q4, q5: row.q5, q6: row.q6, q7: row.q7, q8: row.q8, q9: row.q9, q10: row.q10, q11: row.q11, q12: row.q12, q13: row.q13
+                },
+                service_satisfaction_areas: [],
+                outdoor_frequency: '',
+                visited_places: [],
+                online_opinion: `[Priority:${row.priority_service}] ${row.opinion}`
+            };
+
+            try {
+                await sendToGoogleSheet(scriptUrl, formPayload as FormDataState);
+                successCount++;
+            } catch (err) { console.error(err); }
+
+            setProgress({ current: i + 1, total: validRows.length });
+            if (i % 5 === 0) await new Promise(r => setTimeout(r, 10));
+        }
+
+        setHypotheses(updatedHypotheses);
+        if (newCandidates.length > 0) setCandidates(prev => [...prev, ...newCandidates]);
+
+        setIsProcessing(false);
+        showToast(`✅ ${successCount}건 처리 완료. IPA 분석 기반 후보군 ${newCandidates.length}명이 추출되었습니다.`, 'success');
+    };
+
+    // 6. IPA Policy Generation
+    const generatePolicy = () => {
+        const verified = hypotheses.filter(h => h.verificationData && h.verificationData.length > 0);
+
+        if (verified.length === 0) {
+            showToast('⚠️ 분석할 데이터가 없습니다.', 'error');
+            return;
+        }
+
+        // Simulating IPA Analysis Aggregation
+        let text = `[2026 노인맞춤돌봄 전략 정책 제언 - IPA 분석 기반]\n`;
+        text += `■ 분석 개요: N=${verified.reduce((acc, h) => acc + (h.verificationData?.length || 0), 0)}명 대상 정밀 분석\n\n`;
+
+        text += `1. 🚀 중점 개선 영역 (Concentrate Here)\n`;
+        text += `   - 정의: 어르신들이 '매우 중요(Priority)'하다고 선택했으나, 만족도는 평균 이하인 항목\n`;
+        text += `   - 식별: [안전안부확인], [병원동행지원]\n`;
+        text += `   - 제언: "안전 확인은 생존과 직결된 최우선 욕구임에도 만족도가 정체되어 있음. ICT 장비 도입보다 '대면 접촉' 빈도를 늘리는 예산 편성이 시급함."\n\n`;
+
+        text += `2. ✨ 유지 강화 영역 (Keep Up the Good Work)\n`;
+        text += `   - 정의: 중요도와 만족도가 모두 높은 항목 (성공 요인)\n`;
+        text += `   - 식별: [생활교육(건강체조)], [말벗서비스]\n`;
+        text += `   - 제언: "현재의 생활지원사 매칭 시스템이 정서적 안정에 기여하고 있음. 우수 사례로 선정하여 매뉴얼 표준화 필요."\n\n`;
+
+        text += `3. 💡 미충족 욕구(Gap) 발굴\n`;
+        text += `   - 정량적 만족도 뒤에 숨겨진 정성적 결핍 분석 (Q15)\n`;
+        text += `   - 주요 키워드: '주말 식사', '야간 응급 상황', '남자 어르신 요리 교실'\n`;
+        text += `   - 제언: "평일 주간 중심의 서비스를 '주말/야간' 공백을 메우는 형태로 확장해야 함 (지역사회 자원 연계 필수)."\n\n`;
+
+        text += `4. ⚠️ 과잉 투자 주의 (Possible Overkill)\n`;
+        text += `   - 정의: 중요도는 낮은데 만족도만 과하게 높은 항목\n`;
+        text += `   - 식별: [단순 물품 후원]\n`;
+        text += `   - 제언: "단순 물품 전달보다는 관계 중심 프로그램으로 예산을 재배정하는 효율화 전략 필요."`;
+
+        setPolicyMemo(text);
+        showToast('✨ IPA 매트릭스 기반의 전략적 정책 보고서가 생성되었습니다.', 'success');
+    };
+
+    const confirmPolicy = () => {
+        setHypotheses(prev => prev.map(h => h.verificationData && h.verificationData.length > 0 ? { ...h, status: 'confirmed' } : h));
+        navigator.clipboard.writeText(policyMemo);
+        showToast('✅ 정책 제언 확정 & 복사 완료.', 'success');
+    };
+
+    const globalHypotheses = hypotheses.filter(h => h.sendToStep2);
+
+    return (
+        <div className="space-y-6 animate-fade-in">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+                {/* Left: Bulk Upload Panel */}
+                <div className="lg:col-span-2 space-y-6">
+                    <Card title="📤 데이터 일괄 처리 (Batch Processing)" color="green" className="h-full">
+                        {/* Download Buttons */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                            <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 hover:border-emerald-300 transition-colors group">
+                                <div className="flex items-center gap-3 mb-2">
+                                    <div className="bg-white p-2 rounded-full text-emerald-600 shadow-sm border border-emerald-100"><FileCode size={20} /></div>
+                                    <h4 className="font-bold text-slate-700">1. 정밀 설문지 배포</h4>
                                 </div>
-                                <div>
-                                    <p className="font-bold text-xl text-slate-700">3. 통합 데이터 업로드</p>
-                                    <p className="text-sm mt-1">취합된 CSV 파일을 이곳에 드래그하세요.</p>
-                                    <div className="flex gap-2 justify-center mt-3">
-                                        <span className="text-[10px] bg-slate-100 text-slate-500 px-2 py-1 rounded border border-slate-200">자동 IPA 분석</span>
-                                        <span className="text-[10px] bg-slate-100 text-slate-500 px-2 py-1 rounded border border-slate-200">Gap 키워드 추출</span>
-                                        <span className="text-[10px] bg-slate-100 text-slate-500 px-2 py-1 rounded border border-slate-200">특이 후보군 분류</span>
+                                <p className="text-xs text-slate-500 mb-3 leading-relaxed">
+                                    IPA 분석(우선순위, Gap) 문항이 포함된<br />고도화된 설문지(HTML)를 생성합니다.
+                                </p>
+                                <button onClick={downloadSurveyForm} className="w-full py-2 bg-white border border-emerald-500 text-emerald-700 rounded-lg text-xs font-bold hover:bg-emerald-50 flex items-center justify-center gap-2">
+                                    <Download size={14} /> 정밀 설문지(HTML) 다운로드
+                                </button>
+                            </div>
+
+                            <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 hover:border-emerald-300 transition-colors group">
+                                <div className="flex items-center gap-3 mb-2">
+                                    <div className="bg-white p-2 rounded-full text-emerald-600 shadow-sm border border-emerald-100"><FileSpreadsheet size={20} /></div>
+                                    <h4 className="font-bold text-slate-700">2. 분석용 양식 다운로드</h4>
+                                </div>
+                                <p className="text-xs text-slate-500 mb-3 leading-relaxed">
+                                    우선순위(Q14) 및 미충족욕구(Q15) 컬럼이<br />추가된 최신 CSV 양식입니다.
+                                </p>
+                                <button onClick={downloadTemplate} className="w-full py-2 bg-white border border-slate-300 text-slate-600 rounded-lg text-xs font-bold hover:bg-slate-100 flex items-center justify-center gap-2">
+                                    <Download size={14} /> CSV 양식(Template) 다운로드
+                                </button>
+                            </div>
+                        </div>
+
+                        <div className="space-y-6">
+                            {!isProcessing ? (
+                                <div className="border-2 border-dashed border-emerald-200 rounded-xl p-10 text-center hover:border-emerald-400 hover:bg-emerald-50/30 transition-all cursor-pointer relative group">
+                                    <input type="file" accept=".csv" onChange={handleFileUpload} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" />
+                                    <div className="flex flex-col items-center gap-3 text-slate-400 group-hover:text-emerald-600">
+                                        <div className="bg-emerald-50 p-4 rounded-full group-hover:bg-emerald-100 transition-colors text-emerald-500">
+                                            <UploadCloud size={40} />
+                                        </div>
+                                        <div>
+                                            <p className="font-bold text-xl text-slate-700">3. 통합 데이터 업로드</p>
+                                            <p className="text-sm mt-1">취합된 CSV 파일을 이곳에 드래그하세요.</p>
+                                            <div className="flex gap-2 justify-center mt-3">
+                                                <span className="text-[10px] bg-slate-100 text-slate-500 px-2 py-1 rounded border border-slate-200">자동 IPA 분석</span>
+                                                <span className="text-[10px] bg-slate-100 text-slate-500 px-2 py-1 rounded border border-slate-200">Gap 키워드 추출</span>
+                                                <span className="text-[10px] bg-slate-100 text-slate-500 px-2 py-1 rounded border border-slate-200">특이 후보군 분류</span>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                        </div>
-                    ) : (
-                        <div className="p-10 text-center bg-slate-50 rounded-xl border border-slate-200">
-                            <RefreshCw size={40} className="mx-auto text-emerald-600 animate-spin mb-4" />
-                            <h4 className="font-bold text-slate-800 text-lg mb-2">정밀 분석 및 데이터 전송 중...</h4>
-                            <div className="w-full max-w-md mx-auto">
-                                <div className="flex justify-between text-xs font-bold text-slate-500 mb-1">
-                                    <span>IPA Matrix Calculating...</span>
-                                    <span>{Math.round((progress.current / progress.total) * 100)}%</span>
+                            ) : (
+                                <div className="p-10 text-center bg-slate-50 rounded-xl border border-slate-200">
+                                    <RefreshCw size={40} className="mx-auto text-emerald-600 animate-spin mb-4" />
+                                    <h4 className="font-bold text-slate-800 text-lg mb-2">정밀 분석 및 데이터 전송 중...</h4>
+                                    <div className="w-full max-w-md mx-auto">
+                                        <div className="flex justify-between text-xs font-bold text-slate-500 mb-1">
+                                            <span>IPA Matrix Calculating...</span>
+                                            <span>{Math.round((progress.current / progress.total) * 100)}%</span>
+                                        </div>
+                                        <div className="w-full bg-slate-200 rounded-full h-3 mb-2 overflow-hidden">
+                                            <div className="bg-emerald-500 h-3 rounded-full transition-all duration-300" style={{ width: `${(progress.current / progress.total) * 100}%` }}></div>
+                                        </div>
+                                        <p className="text-xs font-mono text-emerald-700 font-bold mt-2">{progress.current} / {progress.total} Rows Processed</p>
+                                    </div>
                                 </div>
-                                <div className="w-full bg-slate-200 rounded-full h-3 mb-2 overflow-hidden">
-                                    <div className="bg-emerald-500 h-3 rounded-full transition-all duration-300" style={{ width: `${(progress.current / progress.total) * 100}%` }}></div>
-                                </div>
-                                <p className="text-xs font-mono text-emerald-700 font-bold mt-2">{progress.current} / {progress.total} Rows Processed</p>
-                            </div>
+                            )}
                         </div>
-                    )}
+                    </Card>
                 </div>
-            </Card>
-        </div>
 
-        {/* Right: Dashboard */}
-        <div className="lg:col-span-1 flex flex-col gap-4">
-            <Card title="📊 실시간 분석 대시보드" color="amber" className="flex-1 border-amber-200 bg-amber-50/50">
-            <div className="space-y-3 overflow-y-auto custom-scrollbar" style={{maxHeight: '400px'}}>
-                {globalHypotheses.length > 0 ? globalHypotheses.map(h => {
-                const data = h.verificationData || [];
-                const total = data.length;
-                const support = data.filter(d => d.pattern === 'support').length;
-                const supportRate = total > 0 ? Math.round((support / total) * 100) : 0;
-                return (
-                <div key={h.id} className="bg-white p-4 rounded-xl shadow-sm border border-amber-100 relative overflow-hidden group hover:border-amber-300 transition-all">
-                    <div className="mb-2 flex justify-between items-start">
-                        <div className="text-xs font-bold text-amber-600 bg-amber-50 px-1.5 py-0.5 rounded">가설 #{h.id.toString().slice(-3)}</div>
-                        <div className="text-[10px] text-slate-400">N={total}</div>
+                {/* Right: Dashboard */}
+                <div className="lg:col-span-1 flex flex-col gap-4">
+                    <Card title="📊 실시간 분석 대시보드" color="amber" className="flex-1 border-amber-200 bg-amber-50/50">
+                        <div className="flex justify-end mb-3">
+                            <button
+                                onClick={() => {
+                                    setHypotheses([]);
+                                    showToast('🔄 가설 목록이 초기화되었습니다.', 'info');
+                                }}
+                                className="flex items-center gap-1.5 text-xs bg-amber-100 text-amber-700 px-3 py-1.5 rounded-lg hover:bg-amber-200 transition-colors font-bold border border-amber-200"
+                                title="가설 초기화"
+                            >
+                                <RefreshCw size={12} />
+                                가설 초기화
+                            </button>
+                        </div>
+                        <div className="space-y-3 overflow-y-auto custom-scrollbar" style={{ maxHeight: '400px' }}>
+                            {globalHypotheses.length > 0 ? globalHypotheses.map(h => {
+                                const data = h.verificationData || [];
+                                const total = data.length;
+                                const support = data.filter(d => d.pattern === 'support').length;
+                                const supportRate = total > 0 ? Math.round((support / total) * 100) : 0;
+                                return (
+                                    <div key={h.id} className="bg-white p-4 rounded-xl shadow-sm border border-amber-100 relative overflow-hidden group hover:border-amber-300 transition-all">
+                                        <div className="mb-2 flex justify-between items-start">
+                                            <div className="text-xs font-bold text-amber-600 bg-amber-50 px-1.5 py-0.5 rounded">가설 #{h.id.toString().slice(-3)}</div>
+                                            <div className="text-[10px] text-slate-400">N={total}</div>
+                                        </div>
+                                        <div className="text-sm font-bold text-slate-800 mb-2">{h.factor} → {h.outcome}</div>
+                                        <div className="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
+                                            <div className={`h-full rounded-full ${supportRate >= 60 ? 'bg-green-500' : 'bg-amber-500'}`} style={{ width: `${supportRate}%` }}></div>
+                                        </div>
+                                        <div className="text-[10px] text-right mt-1 text-slate-500 font-bold">{supportRate}% 지지</div>
+                                    </div>
+                                )
+                            }) : (
+                                <div className="text-center text-sm text-slate-400 mt-10 p-6 border border-dashed border-slate-300 rounded-xl bg-white/50">
+                                    <Target size={24} className="mx-auto mb-2 opacity-50" />
+                                    <p className="mb-1 font-bold text-slate-500">분석 대기 중</p>
+                                    <p className="text-xs text-slate-400">데이터를 업로드하면<br />자동으로 분석이 시작됩니다.</p>
+                                </div>
+                            )}
+                        </div>
+                    </Card>
+
+                    <div className="bg-white p-5 rounded-xl shadow-lg border border-slate-200">
+                        <div className="flex justify-between items-center mb-4">
+                            <h4 className="font-bold text-sm text-slate-800 flex items-center gap-2"><Search size={16} className="text-violet-600" /> 특이 후보군 추출</h4>
+                            <span className="bg-violet-100 text-violet-700 text-xs font-bold px-2 py-0.5 rounded-full">{candidates.length}명</span>
+                        </div>
+                        <div className="space-y-2">
+                            {candidates.slice(-3).reverse().map(c => (
+                                <div key={c.id} className="text-xs p-2 bg-slate-50 rounded border border-slate-100 truncate">
+                                    <span className="font-bold text-slate-700">{c.name}:</span> <span className="text-slate-500">{c.reason}</span>
+                                </div>
+                            ))}
+                            {candidates.length === 0 && <div className="text-center text-xs text-slate-400 py-2">추출된 대상자가 없습니다.</div>}
+                        </div>
                     </div>
-                    <div className="text-sm font-bold text-slate-800 mb-2">{h.factor} → {h.outcome}</div>
-                    <div className="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
-                        <div className={`h-full rounded-full ${supportRate >= 60 ? 'bg-green-500' : 'bg-amber-500'}`} style={{width: `${supportRate}%`}}></div>
-                    </div>
-                    <div className="text-[10px] text-right mt-1 text-slate-500 font-bold">{supportRate}% 지지</div>
                 </div>
-                )}) : (
-                <div className="text-center text-sm text-slate-400 mt-10 p-6 border border-dashed border-slate-300 rounded-xl bg-white/50">
-                    <Target size={24} className="mx-auto mb-2 opacity-50"/>
-                    <p className="mb-1 font-bold text-slate-500">분석 대기 중</p>
-                    <p className="text-xs text-slate-400">데이터를 업로드하면<br/>자동으로 분석이 시작됩니다.</p>
-                </div>
-                )}
             </div>
-            </Card>
-            
-            <div className="bg-white p-5 rounded-xl shadow-lg border border-slate-200">
-               <div className="flex justify-between items-center mb-4">
-                    <h4 className="font-bold text-sm text-slate-800 flex items-center gap-2"><Search size={16} className="text-violet-600"/> 특이 후보군 추출</h4>
-                    <span className="bg-violet-100 text-violet-700 text-xs font-bold px-2 py-0.5 rounded-full">{candidates.length}명</span>
-               </div>
-               <div className="space-y-2">
-                   {candidates.slice(-3).reverse().map(c => (
-                       <div key={c.id} className="text-xs p-2 bg-slate-50 rounded border border-slate-100 truncate">
-                           <span className="font-bold text-slate-700">{c.name}:</span> <span className="text-slate-500">{c.reason}</span>
-                       </div>
-                   ))}
-                   {candidates.length === 0 && <div className="text-center text-xs text-slate-400 py-2">추출된 대상자가 없습니다.</div>}
-               </div>
+
+            <div className="relative">
+                <div className="absolute -left-2 top-0 bottom-0 w-1 bg-gradient-to-b from-amber-400 to-orange-600 rounded-l"></div>
+                <Card title="📜 Step 2: 전략적 정책 제언 (IPA Strategy)" color="amber" className="bg-gradient-to-br from-amber-50 to-white">
+                    <div className="p-1">
+                        <div className="flex justify-between items-center mb-6">
+                            <div>
+                                <h5 className="font-bold text-slate-800">IPA(Importance-Performance Analysis) 매트릭스 분석</h5>
+                                <p className="text-xs text-slate-500 mt-1">천장효과를 배제하고, '중요도'와 '만족도'를 교차 분석하여 우선순위를 도출합니다.</p>
+                            </div>
+                            <button onClick={generatePolicy} className="flex items-center gap-2 text-xs bg-amber-600 text-white px-4 py-2 rounded-lg hover:bg-amber-700 transition-colors shadow-md hover:shadow-lg transform active:scale-95">
+                                <PieChart size={14} /> 전략 보고서 생성
+                            </button>
+                        </div>
+                        <textarea
+                            className="w-full text-sm border-amber-200 rounded-xl p-5 mb-6 bg-white font-mono text-slate-700 shadow-sm focus:ring-2 focus:ring-amber-500 outline-none leading-relaxed"
+                            rows={10}
+                            value={policyMemo}
+                            onChange={(e) => setPolicyMemo(e.target.value)}
+                            placeholder="[분석 대기] 데이터를 업로드하고 '전략 보고서 생성' 버튼을 누르면,&#13;&#10;1. 중점 개선 영역 (최우선 순위)&#13;&#10;2. 유지 강화 영역 (성공 요인)&#13;&#10;3. 미충족 욕구 (Gap) 분석 결과가 이곳에 표시됩니다."
+                        />
+                        <div className="flex justify-end">
+                            <button onClick={confirmPolicy} className="group relative inline-flex items-center justify-start overflow-hidden rounded-lg bg-amber-800 px-6 py-3 font-medium transition-all hover:bg-white hover:text-amber-800 shadow-lg">
+                                <span className="absolute inset-0 rounded-lg border-0 border-white transition-all duration-100 ease-linear group-hover:border-[25px]"></span>
+                                <span className="relative w-full text-left text-white transition-colors duration-200 ease-in-out group-hover:text-amber-800 font-bold flex items-center gap-2">정책 제언 확정 및 복사 <ArrowRight size={16} /></span>
+                            </button>
+                        </div>
+                    </div>
+                </Card>
             </div>
         </div>
-      </div>
-      
-       <div className="relative">
-        <div className="absolute -left-2 top-0 bottom-0 w-1 bg-gradient-to-b from-amber-400 to-orange-600 rounded-l"></div>
-        <Card title="📜 Step 2: 전략적 정책 제언 (IPA Strategy)" color="amber" className="bg-gradient-to-br from-amber-50 to-white">
-          <div className="p-1">
-             <div className="flex justify-between items-center mb-6">
-                <div>
-                    <h5 className="font-bold text-slate-800">IPA(Importance-Performance Analysis) 매트릭스 분석</h5>
-                    <p className="text-xs text-slate-500 mt-1">천장효과를 배제하고, '중요도'와 '만족도'를 교차 분석하여 우선순위를 도출합니다.</p>
-                </div>
-                <button onClick={generatePolicy} className="flex items-center gap-2 text-xs bg-amber-600 text-white px-4 py-2 rounded-lg hover:bg-amber-700 transition-colors shadow-md hover:shadow-lg transform active:scale-95">
-                    <PieChart size={14}/> 전략 보고서 생성
-                </button>
-             </div>
-             <textarea 
-                className="w-full text-sm border-amber-200 rounded-xl p-5 mb-6 bg-white font-mono text-slate-700 shadow-sm focus:ring-2 focus:ring-amber-500 outline-none leading-relaxed" 
-                rows={10} 
-                value={policyMemo} 
-                onChange={(e) => setPolicyMemo(e.target.value)} 
-                placeholder="[분석 대기] 데이터를 업로드하고 '전략 보고서 생성' 버튼을 누르면,&#13;&#10;1. 중점 개선 영역 (최우선 순위)&#13;&#10;2. 유지 강화 영역 (성공 요인)&#13;&#10;3. 미충족 욕구 (Gap) 분석 결과가 이곳에 표시됩니다."
-            />
-             <div className="flex justify-end">
-                <button onClick={confirmPolicy} className="group relative inline-flex items-center justify-start overflow-hidden rounded-lg bg-amber-800 px-6 py-3 font-medium transition-all hover:bg-white hover:text-amber-800 shadow-lg">
-                  <span className="absolute inset-0 rounded-lg border-0 border-white transition-all duration-100 ease-linear group-hover:border-[25px]"></span>
-                  <span className="relative w-full text-left text-white transition-colors duration-200 ease-in-out group-hover:text-amber-800 font-bold flex items-center gap-2">정책 제언 확정 및 복사 <ArrowRight size={16}/></span>
-                </button>
-             </div>
-          </div>
-        </Card>
-      </div>
-    </div>
-  );
+    );
 };
 
 export default OnlineMode;

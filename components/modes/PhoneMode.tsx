@@ -168,19 +168,107 @@ const PhoneMode: React.FC<PhoneModeProps> = ({
             </div>
 
             <div>
-              <label className="block text-sm font-bold text-slate-700 mb-2">주요 제공 서비스</label>
-              <div className="grid grid-cols-2 gap-2">
-                {['안전지원(안전안부확인, 생활안전점검)', '안전지원(정보제공, 말벗_정서지원)', '사회참여(문화여가 활동, 자조모임)', '생활교육(건강/영양보건교육, 우울예방, 인지활동/치매예방)', '일상생활지원(가사지원_식사 청소관리, 이동활동지원)', '연계서비스(건강지원,주거개선,생활지원 연계)'].map(item => (
-                  <label key={item} className="flex items-center gap-2 text-sm bg-slate-50 p-2 rounded border hover:bg-slate-100 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={(formData.service_items || []).includes(item)}
-                      onChange={() => handleCheck(item)}
-                      className="rounded text-blue-600"
-                    />
-                    {item}
-                  </label>
-                ))}
+              <label className="block text-sm font-bold text-slate-700 mb-3">주요 제공 서비스</label>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                {/* 안전지원 */}
+                <div className="bg-blue-50 p-3 rounded-lg border border-blue-100">
+                  <div className="text-xs font-bold text-blue-700 mb-2 flex items-center gap-1">
+                    🔵 안전지원
+                  </div>
+                  <div className="space-y-1.5">
+                    {['말벗_정서지원', '정보제공'].map(item => (
+                      <label key={item} className="flex items-center gap-2 text-sm bg-white p-2 rounded border border-blue-100 hover:bg-blue-50 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={(formData.service_items || []).includes(item)}
+                          onChange={() => handleCheck(item)}
+                          className="rounded text-blue-600"
+                        />
+                        {item}
+                      </label>
+                    ))}
+                  </div>
+                </div>
+
+                {/* 사회참여 */}
+                <div className="bg-green-50 p-3 rounded-lg border border-green-100">
+                  <div className="text-xs font-bold text-green-700 mb-2 flex items-center gap-1">
+                    🟢 사회참여
+                  </div>
+                  <div className="space-y-1.5">
+                    {['문화여가 활동', '자조모임'].map(item => (
+                      <label key={item} className="flex items-center gap-2 text-sm bg-white p-2 rounded border border-green-100 hover:bg-green-50 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={(formData.service_items || []).includes(item)}
+                          onChange={() => handleCheck(item)}
+                          className="rounded text-green-600"
+                        />
+                        {item}
+                      </label>
+                    ))}
+                  </div>
+                </div>
+
+                {/* 생활교육 */}
+                <div className="bg-sky-50 p-3 rounded-lg border border-sky-100">
+                  <div className="text-xs font-bold text-sky-700 mb-2 flex items-center gap-1">
+                    🔷 생활교육
+                  </div>
+                  <div className="space-y-1.5">
+                    {['건강/영양보건교육', '인지활동/치매예방'].map(item => (
+                      <label key={item} className="flex items-center gap-2 text-sm bg-white p-2 rounded border border-sky-100 hover:bg-sky-50 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={(formData.service_items || []).includes(item)}
+                          onChange={() => handleCheck(item)}
+                          className="rounded text-sky-600"
+                        />
+                        {item}
+                      </label>
+                    ))}
+                  </div>
+                </div>
+
+                {/* 일상생활지원 */}
+                <div className="bg-orange-50 p-3 rounded-lg border border-orange-100">
+                  <div className="text-xs font-bold text-orange-700 mb-2 flex items-center gap-1">
+                    🟠 일상생활지원
+                  </div>
+                  <div className="space-y-1.5">
+                    {['가사지원_식사 청소관리'].map(item => (
+                      <label key={item} className="flex items-center gap-2 text-sm bg-white p-2 rounded border border-orange-100 hover:bg-orange-50 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={(formData.service_items || []).includes(item)}
+                          onChange={() => handleCheck(item)}
+                          className="rounded text-orange-600"
+                        />
+                        {item}
+                      </label>
+                    ))}
+                  </div>
+                </div>
+
+                {/* 연계서비스 */}
+                <div className="bg-violet-50 p-3 rounded-lg border border-violet-100 md:col-span-2">
+                  <div className="text-xs font-bold text-violet-700 mb-2 flex items-center gap-1">
+                    🟣 연계서비스
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {['주거개선', '생활지원'].map(item => (
+                      <label key={item} className="flex items-center gap-2 text-sm bg-white p-2 rounded border border-violet-100 hover:bg-violet-50 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={(formData.service_items || []).includes(item)}
+                          onChange={() => handleCheck(item)}
+                          className="rounded text-violet-600"
+                        />
+                        {item}
+                      </label>
+                    ))}
+                  </div>
+                </div>
               </div>
             </div>
 

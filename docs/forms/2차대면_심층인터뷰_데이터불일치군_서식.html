@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2차 대면 심층 인터뷰 서식 - 데이터불일치군</title>
+    <style>
+        @page {
+            size: A4 portrait;
+            margin: 12mm;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Malgun Gothic', '맑은 고딕', sans-serif;
+            font-size: 10pt;
+            line-height: 1.5;
+            color: #333;
+            background: #fff;
+            padding: 15px;
+        }
+
+        .form-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            border-bottom: 3px double #9b59b6;
+            padding-bottom: 12px;
+            margin-bottom: 15px;
+        }
+
+        .header h1 {
+            font-size: 18pt;
+            font-weight: bold;
+            color: #9b59b6;
+            margin-bottom: 3px;
+        }
+
+        .header h2 {
+            font-size: 12pt;
+            font-weight: normal;
+            color: #666;
+        }
+
+        .header .badge {
+            display: inline-block;
+            background: #e74c3c;
+            color: white;
+            padding: 3px 12px;
+            border-radius: 15px;
+            font-size: 10pt;
+            margin-top: 5px;
+        }
+
+        .info-section {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 15px;
+            border: 1px solid #9b59b6;
+            padding: 12px;
+            background: #faf5ff;
+        }
+
+        .info-item {
+            flex: 1 1 30%;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .info-item label {
+            font-weight: bold;
+            min-width: 80px;
+            font-size: 9pt;
+        }
+
+        .info-item .input-box {
+            flex: 1;
+            border-bottom: 1px solid #333;
+            min-height: 20px;
+            padding: 2px 5px;
+        }
+
+        .interview-item {
+            margin-bottom: 20px;
+            page-break-inside: avoid;
+        }
+
+        .question-header {
+            background: linear-gradient(135deg, #9b59b6, #8e44ad);
+            color: white;
+            padding: 8px 12px;
+            font-weight: bold;
+            font-size: 10pt;
+            border-radius: 5px 5px 0 0;
+        }
+
+        .question-body {
+            border: 1px solid #9b59b6;
+            border-top: none;
+            padding: 12px;
+        }
+
+        .question-text {
+            font-size: 10pt;
+            line-height: 1.5;
+            margin-bottom: 10px;
+            background: #f5eef8;
+            padding: 8px;
+            border-radius: 3px;
+        }
+
+        .answer-box {
+            width: 100%;
+            min-height: 50px;
+            border: 1px dashed #ccc;
+            padding: 8px;
+            background: #fff;
+        }
+
+        .example-text {
+            font-size: 8pt;
+            color: #888;
+            font-style: italic;
+            margin-top: 5px;
+        }
+
+        .summary-section {
+            margin-top: 20px;
+            border: 2px solid #9b59b6;
+            padding: 12px;
+            background: #faf5ff;
+        }
+
+        .summary-section h3 {
+            margin-bottom: 10px;
+            font-size: 11pt;
+            color: #8e44ad;
+        }
+
+        .summary-box {
+            width: 100%;
+            min-height: 80px;
+            border: 1px dashed #999;
+            padding: 8px;
+        }
+
+        .footer {
+            margin-top: 20px;
+            text-align: center;
+            font-size: 8pt;
+            color: #666;
+            border-top: 1px solid #ccc;
+            padding-top: 10px;
+        }
+
+        .purpose-box {
+            margin-bottom: 15px;
+            padding: 10px;
+            background: #fce4ec;
+            border-left: 4px solid #e74c3c;
+            font-size: 9pt;
+        }
+
+        @media print {
+            body {
+                padding: 0;
+            }
+
+            .interview-item {
+                page-break-inside: avoid;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="form-container">
+        <div class="header">
+            <h1>🎤 2차 대면 심층 인터뷰</h1>
+            <h2>데이터불일치군 (The Paradox Group)</h2>
+        </div>
+
+        <div class="info-section">
+            <div class="info-item">
+                <label>대상자명:</label>
+                <div class="input-box"></div>
+            </div>
+            <div class="info-item">
+                <label>인터뷰일:</label>
+                <div class="input-box"></div>
+            </div>
+            <div class="info-item">
+                <label>인터뷰어:</label>
+                <div class="input-box"></div>
+            </div>
+            <div class="info-item">
+                <label>시군:</label>
+                <div class="input-box"></div>
+            </div>
+            <div class="info-item">
+                <label>수행기관:</label>
+                <div class="input-box"></div>
+            </div>
+            <div class="info-item">
+                <label>불일치유형:</label>
+                <div class="input-box"></div>
+            </div>
+        </div>
+
+
+        <div class="interview-item">
+            <div class="question-header">1. 이면의 진실</div>
+            <div class="question-body">
+                <div class="question-text">설문조사에서는 매우 만족한다고 하셨는데, 사실 몸은 여전히 많이 편찮으셔서 힘들지는 않으신가요?</div>
+                <div class="answer-box"></div>
+                <div class="example-text">예: 사실 몸은 많이 아픈데, 그래도 오시는 게 좋아서...</div>
+            </div>
+        </div>
+
+        <div class="interview-item">
+            <div class="question-header">2. 만족의 이유</div>
+            <div class="question-body">
+                <div class="question-text">(건강이 안 좋음에도 만족한다면) 몸이 힘드신데도 불구하고 이 서비스를 좋게 평가해주신 가장 큰 이유는 무엇입니까?</div>
+                <div class="answer-box"></div>
+                <div class="example-text">예: 그래도 누가 찾아와 주니까 살맛이 나요</div>
+            </div>
+        </div>
+
+        <div class="interview-item">
+            <div class="question-header">3. 숨겨진 조력자</div>
+            <div class="question-body">
+                <div class="question-text">우리 선생님 말고도, 혹시 자녀분이나 종교단체, 이웃 등 따로 도와주는 분들이 계셔서 생활이 괜찮으신 건가요?</div>
+                <div class="answer-box"></div>
+                <div class="example-text">예: 며느리가 일주일에 한 번 와요 / 교회 집사님이 도와주세요</div>
+            </div>
+        </div>
+
+        <div class="interview-item">
+            <div class="question-header">4. 상대적 비교</div>
+            <div class="question-body">
+                <div class="question-text">혹시 예전에 서비스를 전혀 못 받던 시절과 비교해서, 지금이 훨씬 낫다고 느껴서 점수를 좋게 주신 건가요?</div>
+                <div class="answer-box"></div>
+                <div class="example-text">예: 예전엔 정말 아무도 없었거든요...</div>
+            </div>
+        </div>
+
+        <div class="interview-item">
+            <div class="question-header">5. 장애 요인</div>
+            <div class="question-body">
+                <div class="question-text">열심히 서비스를 받으시는데도 건강이 빨리 좋아지지 않는다면, 무엇이 회복을 가장 방해하고 있다고 생각하십니까?</div>
+                <div class="answer-box"></div>
+                <div class="example-text">예: 돈이 없어서 병원을 못 가요 / 집이 너무 추워요</div>
+            </div>
+        </div>
+
+        <div class="interview-item">
+            <div class="question-header">6. 심리적 방어</div>
+            <div class="question-body">
+                <div class="question-text">혹시 "힘들다"거나 "불만이다"라고 말하면, 선생님이 서운해하거나 서비스가 끊길까 봐 걱정되시나요?</div>
+                <div class="answer-box"></div>
+                <div class="example-text">예: 괜히 불편한 소리 하면 안 올까 봐...</div>
+            </div>
+        </div>
+
+        <div class="interview-item">
+            <div class="question-header">7. 경제적 불안</div>
+            <div class="question-body">
+                <div class="question-text">건강 문제보다 당장 먹고 사는 돈 문제나 난방비 걱정 때문에 마음의 여유가 없으신 건 아닌가요?</div>
+                <div class="answer-box"></div>
+                <div class="example-text">예: 사실 난방비가 너무 무서워요</div>
+            </div>
+        </div>
+
+        <div class="interview-item">
+            <div class="question-header">8. 가족 관계</div>
+            <div class="question-body">
+                <div class="question-text">자녀분들과의 관계나 집안 사정이 서비스 만족도 응답에 영향을 미치기도 했나요? (예: 자녀가 못 해주는 걸 해줘서 고마움 등)</div>
+                <div class="answer-box"></div>
+                <div class="example-text">예: 자식들은 바빠서 연락도 안 하는데, 선생님이라도 오시니...</div>
+            </div>
+        </div>
+
+        <div class="interview-item">
+            <div class="question-header">9. 미충족 욕구</div>
+            <div class="question-body">
+                <div class="question-text">점수를 후하게 주셨지만, 솔직히 "나라에서 이것만 해결해주면 소원이 없겠다" 싶은 딱 한 가지 아쉬움은 무엇입니까?</div>
+                <div class="answer-box"></div>
+                <div class="example-text">예: 병원비를 좀 도와주면 좋겠어요 / 집 수리를 해주면...</div>
+            </div>
+        </div>
+
+        <div class="interview-item">
+            <div class="question-header">10. 설문 이해도</div>
+            <div class="question-body">
+                <div class="question-text">지난번 설문조사 때 질문 내용이 어렵거나, 어떻게 대답해야 할지 애매했던 문항이 있었습니까?</div>
+                <div class="answer-box"></div>
+                <div class="example-text">예: 점수 매기는 게 헷갈렸어요 / 질문이 너무 길었어요</div>
+            </div>
+        </div>
+
+
+        <div class="footer">
+            <p>노인맞춤돌봄서비스 통합 모니터링 시스템 | 2차 대면 심층 인터뷰 - 데이터불일치군</p>
+        </div>
+    </div>
+</body>
+
+</html>

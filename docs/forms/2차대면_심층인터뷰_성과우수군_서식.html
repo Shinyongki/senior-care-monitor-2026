@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2차 대면 심층 인터뷰 서식 - 성과우수군</title>
+    <style>
+        @page {
+            size: A4 portrait;
+            margin: 12mm;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Malgun Gothic', '맑은 고딕', sans-serif;
+            font-size: 10pt;
+            line-height: 1.5;
+            color: #333;
+            background: #fff;
+            padding: 15px;
+        }
+
+        .form-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            border-bottom: 3px double #f39c12;
+            padding-bottom: 12px;
+            margin-bottom: 15px;
+        }
+
+        .header h1 {
+            font-size: 18pt;
+            font-weight: bold;
+            color: #f39c12;
+            margin-bottom: 3px;
+        }
+
+        .header h2 {
+            font-size: 12pt;
+            font-weight: normal;
+            color: #666;
+        }
+
+        .header .badge {
+            display: inline-block;
+            background: #27ae60;
+            color: white;
+            padding: 3px 12px;
+            border-radius: 15px;
+            font-size: 10pt;
+            margin-top: 5px;
+        }
+
+        .info-section {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 15px;
+            border: 1px solid #f39c12;
+            padding: 12px;
+            background: #fffbf0;
+        }
+
+        .info-item {
+            flex: 1 1 30%;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .info-item label {
+            font-weight: bold;
+            min-width: 80px;
+            font-size: 9pt;
+        }
+
+        .info-item .input-box {
+            flex: 1;
+            border-bottom: 1px solid #333;
+            min-height: 20px;
+            padding: 2px 5px;
+        }
+
+        .interview-item {
+            margin-bottom: 20px;
+            page-break-inside: avoid;
+        }
+
+        .question-header {
+            background: linear-gradient(135deg, #f39c12, #e67e22);
+            color: white;
+            padding: 8px 12px;
+            font-weight: bold;
+            font-size: 10pt;
+            border-radius: 5px 5px 0 0;
+        }
+
+        .question-body {
+            border: 1px solid #f39c12;
+            border-top: none;
+            padding: 12px;
+        }
+
+        .question-text {
+            font-size: 10pt;
+            line-height: 1.5;
+            margin-bottom: 10px;
+            background: #fff9e6;
+            padding: 8px;
+            border-radius: 3px;
+        }
+
+        .answer-box {
+            width: 100%;
+            min-height: 50px;
+            border: 1px dashed #ccc;
+            padding: 8px;
+            background: #fff;
+        }
+
+        .example-text {
+            font-size: 8pt;
+            color: #888;
+            font-style: italic;
+            margin-top: 5px;
+        }
+
+        .summary-section {
+            margin-top: 20px;
+            border: 2px solid #f39c12;
+            padding: 12px;
+            background: #fffbf0;
+        }
+
+        .summary-section h3 {
+            margin-bottom: 10px;
+            font-size: 11pt;
+            color: #e67e22;
+        }
+
+        .summary-box {
+            width: 100%;
+            min-height: 80px;
+            border: 1px dashed #999;
+            padding: 8px;
+        }
+
+        .footer {
+            margin-top: 20px;
+            text-align: center;
+            font-size: 8pt;
+            color: #666;
+            border-top: 1px solid #ccc;
+            padding-top: 10px;
+        }
+
+        .purpose-box {
+            margin-bottom: 15px;
+            padding: 10px;
+            background: #e8f8e8;
+            border-left: 4px solid #27ae60;
+            font-size: 9pt;
+        }
+
+        @media print {
+            body {
+                padding: 0;
+            }
+
+            .interview-item {
+                page-break-inside: avoid;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="form-container">
+        <div class="header">
+            <h1>🎤 2차 대면 심층 인터뷰</h1>
+            <h2>성과우수군 (Best Practice Group)</h2>
+
+        </div>
+
+        <div class="info-section">
+            <div class="info-item">
+                <label>대상자명:</label>
+                <div class="input-box"></div>
+            </div>
+            <div class="info-item">
+                <label>인터뷰일:</label>
+                <div class="input-box"></div>
+            </div>
+            <div class="info-item">
+                <label>인터뷰어:</label>
+                <div class="input-box"></div>
+            </div>
+            <div class="info-item">
+                <label>시군:</label>
+                <div class="input-box"></div>
+            </div>
+            <div class="info-item">
+                <label>수행기관:</label>
+                <div class="input-box"></div>
+            </div>
+            <div class="info-item">
+                <label>선정사유:</label>
+                <div class="input-box"></div>
+            </div>
+        </div>
+
+
+        <div class="interview-item">
+            <div class="question-header">1. 결정적 순간</div>
+            <div class="question-body">
+                <div class="question-text">지난 1년간 서비스를 받으시면서 "아, 이 서비스 신청하길 참 잘했다"라고 느꼈던 가장 기억에 남는 순간은 언제였나요?</div>
+                <div class="answer-box"></div>
+                <div class="example-text">예: 아플 때 선생님이 바로 오셨을 때, 명절에 챙겨주셨을 때...</div>
+            </div>
+        </div>
+
+        <div class="interview-item">
+            <div class="question-header">2. 핵심 동인</div>
+            <div class="question-body">
+                <div class="question-text">건강도 좋아지시고 표정도 밝아지셨는데, 가장 큰 도움이 된 것은 "선생님의 방문(사람)"인가요, 아니면 "프로그램/물품(서비스)"인가요?
+                </div>
+                <div class="answer-box"></div>
+                <div class="example-text">예: 선생님이 자주 와주시는 게 가장 좋아요 / 운동 프로그램이 도움 됐어요</div>
+            </div>
+        </div>
+
+        <div class="interview-item">
+            <div class="question-header">3. 일상의 변화</div>
+            <div class="question-body">
+                <div class="question-text">서비스를 받기 전과 비교해서, 아침에 일어나서 주무실 때까지의 하루 일과 중 가장 크게 달라진 점은 무엇입니까?</div>
+                <div class="answer-box"></div>
+                <div class="example-text">예: 아침에 일어나는 게 즐거워졌어요. 운동도 하게 됐고...</div>
+            </div>
+        </div>
+
+        <div class="interview-item">
+            <div class="question-header">4. 심리적 위안</div>
+            <div class="question-body">
+                <div class="question-text">혼자 계실 때 문득 외롭거나 불안할 때가 있으실 텐데, 그럴 때 이 서비스의 어떤 점이 가장 의지가 되시나요?</div>
+                <div class="answer-box"></div>
+                <div class="example-text">예: 아무 때나 전화할 수 있다는 게 든든해요</div>
+            </div>
+        </div>
+
+        <div class="interview-item">
+            <div class="question-header">5. 관계의 확장</div>
+            <div class="question-body">
+                <div class="question-text">이제 건강해지셨으니, 혹시 주변 이웃들에게도 이 서비스를 권하거나, 경로당/복지관에서 활동을 더 많이 하게 되셨나요?</div>
+                <div class="answer-box"></div>
+                <div class="example-text">예: 이웃 할머니한테도 신청하라고 했어요</div>
+            </div>
+        </div>
+
+        <div class="interview-item">
+            <div class="question-header">6. 신뢰 관계</div>
+            <div class="question-body">
+                <div class="question-text">담당 생활지원사 선생님을 가족이나 친구에 비유한다면, 어느 정도나 가깝고 믿음직한 존재라고 느끼시나요?</div>
+                <div class="answer-box"></div>
+                <div class="example-text">예: 딸 같아요 / 친구 같아요 / 아직 좀 서먹해요</div>
+            </div>
+        </div>
+
+        <div class="interview-item">
+            <div class="question-header">7. 자기 효능감</div>
+            <div class="question-body">
+                <div class="question-text">도움을 받는 것을 넘어, 이제는 "나 혼자서도 이것쯤은 할 수 있다"고 자신감이 생긴 일이 있으신가요?</div>
+                <div class="answer-box"></div>
+                <div class="example-text">예: 혼자 병원도 다닐 수 있게 됐어요</div>
+            </div>
+        </div>
+
+        <div class="interview-item">
+            <div class="question-header">8. 유지 요인</div>
+            <div class="question-body">
+                <div class="question-text">지금 상태를 계속 유지하기 위해서, 앞으로도 이것만큼은 절대로 없어지지 않고 계속 해줬으면 좋겠다 하는 것은 무엇입니까?</div>
+                <div class="answer-box"></div>
+                <div class="example-text">예: 주 2회 방문은 꼭 유지해주세요</div>
+            </div>
+        </div>
+
+        <div class="interview-item">
+            <div class="question-header">9. 개선 제안</div>
+            <div class="question-body">
+                <div class="question-text">지금도 너무 좋다고 하셨지만, 그래도 욕심을 조금 부려본다면 "이것 하나만 더 있으면 금상첨화겠다" 싶은 게 있으신가요?</div>
+                <div class="answer-box"></div>
+                <div class="example-text">예: 저녁 때도 한 번 전화 주시면 더 좋겠어요</div>
+            </div>
+        </div>
+
+        <div class="interview-item">
+            <div class="question-header">10. 미래 기대</div>
+            <div class="question-body">
+                <div class="question-text">내년에도 이 서비스를 계속 이용하신다면, 본인의 모습이 어떻게 더 좋아지기를 기대하십니까?</div>
+                <div class="answer-box"></div>
+                <div class="example-text">예: 건강해져서 손주들 볼 수 있었으면 좋겠어요</div>
+            </div>
+        </div>
+
+
+
+        <div class="footer">
+            <p>노인맞춤돌봄서비스 통합 모니터링 시스템 | 2차 대면 심층 인터뷰 - 성과우수군</p>
+        </div>
+    </div>
+</body>
+
+</html>

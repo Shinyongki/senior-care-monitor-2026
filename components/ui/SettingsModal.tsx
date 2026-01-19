@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { X, Save, Link, AlertCircle, CheckCircle2, Beaker } from 'lucide-react';
+import { X, Save, Link, AlertCircle, CheckCircle2, Beaker, ExternalLink } from 'lucide-react';
 
 interface SettingsModalProps {
   isVisible: boolean;
@@ -12,9 +12,13 @@ interface SettingsModalProps {
 
 export const SettingsModal: React.FC<SettingsModalProps> = ({ isVisible, onClose, onSave, onSimulate, currentUrl }) => {
   const [url, setUrl] = useState('');
+  const [sheetUrl, setSheetUrl] = useState(() => localStorage.getItem('googleSheetDirectUrl') || '');
 
   useEffect(() => {
-    if (isVisible) setUrl(currentUrl);
+    if (isVisible) {
+      setUrl(currentUrl);
+      setSheetUrl(localStorage.getItem('googleSheetDirectUrl') || '');
+    }
   }, [isVisible, currentUrl]);
 
   if (!isVisible) return null;
@@ -62,12 +66,63 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isVisible, onClose
               placeholder="https://script.google.com/macros/s/..."
               className="w-full p-3 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all"
             />
-            <div className="text-xs text-slate-400">
-              * 브라우저 캐시에 저장됩니다.
+
+            {/* Sheet URL Input */}
+            <div className="pt-2">
+              <label className="block text-xs font-bold text-slate-500 mb-1">📊 구글 시트 직접 URL (선택)</label>
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={sheetUrl}
+                  onChange={(e) => setSheetUrl(e.target.value)}
+                  placeholder="https://docs.google.com/spreadsheets/d/..."
+                  className="flex-1 p-2.5 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-green-500 outline-none transition-all"
+                />
+                <button
+                  onClick={() => {
+                    if (sheetUrl) {
+                      window.open(sheetUrl, '_blank');
+                    } else {
+                      alert('구글 시트 URL을 먼저 입력해주세요.');
+                    }
+                  }}
+                  className="px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg font-bold text-sm whitespace-nowrap flex items-center gap-1.5 transition-colors"
+                >
+                  <ExternalLink size={14} />
+                  시트 열기
+                </button>
+              </div>
+              <div className="text-xs text-slate-400 mt-1">
+                * 시트 URL을 입력하면 버튼으로 바로 열 수 있습니다.
+              </div>
             </div>
           </div>
 
-          {/* Section 2: Data Reset */}
+          {/* Section 2: Simulation */}
+          {onSimulate && (
+            <div className="space-y-4">
+              <h4 className="font-bold text-emerald-700 text-sm border-b border-emerald-200 pb-2 flex items-center gap-2">
+                <Beaker size={16} /> 시뮬레이션 데이터 생성
+              </h4>
+              <div className="flex flex-col gap-3">
+                <p className="text-xs text-slate-500 leading-relaxed">
+                  테스트용 더미 데이터를 생성합니다:<br />
+                  • 유선 모니터링 30건 (위험 8건)<br />
+                  • 1차 대면 리스크 대상자 8명<br />
+                  • 가설 5건 (각 50개 검증데이터)<br />
+                  • 2차 심층면접 후보 4명
+                </p>
+                <button
+                  onClick={onSimulate}
+                  className="w-full py-3 bg-emerald-500 hover:bg-emerald-600 text-white font-bold rounded-xl shadow-md transition-all flex items-center justify-center gap-2 text-sm"
+                >
+                  🧪 시뮬레이션 데이터 생성
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Section 3: Data Reset */}
           <div className="space-y-4">
             <h4 className="font-bold text-red-600 text-sm border-b border-red-200 pb-2 flex items-center gap-2">
               🗑️ 데이터 초기화
@@ -104,7 +159,10 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isVisible, onClose
             닫기
           </button>
           <button
-            onClick={() => onSave(url)}
+            onClick={() => {
+              localStorage.setItem('googleSheetDirectUrl', sheetUrl);
+              onSave(url);
+            }}
             className="px-5 py-2.5 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-colors font-bold shadow-lg flex items-center gap-2"
           >
             <Save size={16} /> 설정 저장

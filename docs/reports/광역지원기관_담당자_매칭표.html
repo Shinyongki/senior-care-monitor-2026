@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>광역지원기관 담당자-시군-수행기관 매칭표</title>
+    <style>
+        @page {
+            size: A4 landscape;
+            margin: 15mm;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Malgun Gothic', '맑은 고딕', sans-serif;
+            font-size: 9pt;
+            line-height: 1.4;
+            padding: 20px;
+            background: #fff;
+        }
+
+        .container {
+            max-width: 100%;
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 16pt;
+            margin-bottom: 15px;
+            color: #1e3a5f;
+            border-bottom: 3px solid #1e3a5f;
+            padding-bottom: 10px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 8.5pt;
+        }
+
+        th,
+        td {
+            border: 1px solid #333;
+            padding: 6px 8px;
+            text-align: left;
+            vertical-align: top;
+        }
+
+        th {
+            background: #1e3a5f;
+            color: #fff;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        th:nth-child(1) {
+            width: 10%;
+        }
+
+        th:nth-child(2) {
+            width: 10%;
+        }
+
+        th:nth-child(3) {
+            width: 80%;
+        }
+
+        .manager-cell {
+            background: #e8f0f8;
+            font-weight: bold;
+            text-align: center;
+            vertical-align: middle;
+            color: #1e3a5f;
+        }
+
+        .region-cell {
+            background: #f5f5f5;
+            font-weight: 600;
+            vertical-align: middle;
+            text-align: center;
+        }
+
+        .agency-cell {
+            font-size: 8pt;
+        }
+
+        .agency-cell span {
+            display: inline-block;
+            background: #f0f7ff;
+            border: 1px solid #cde0f5;
+            border-radius: 3px;
+            padding: 2px 6px;
+            margin: 1px 2px;
+            font-size: 7.5pt;
+        }
+
+        .footer {
+            margin-top: 15px;
+            text-align: right;
+            font-size: 8pt;
+            color: #666;
+        }
+
+        @media print {
+            body {
+                padding: 0;
+            }
+
+            .container {
+                page-break-inside: avoid;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>2026년 노인맞춤돌봄서비스 광역지원기관 담당자-시군-수행기관 매칭표</h1>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>담당자</th>
+                    <th>시군</th>
+                    <th>수행기관</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- 이연숙 담당 -->
+                <tr>
+                    <td rowspan="4" class="manager-cell">이연숙</td>
+                    <td class="region-cell">김해시</td>
+                    <td class="agency-cell">
+                        <span>효능원노인통합지원센터</span><span>김해시종합사회복지관</span><span>생명의전화노인통합지원센터</span><span>보현행원노인통합지원센터</span><span>김해돌봄지원센터</span>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="region-cell">남해군</td>
+                    <td class="agency-cell"><span>화방남해노인통합지원센터</span><span>화방재가복지센터</span></td>
+                </tr>
+                <tr>
+                    <td class="region-cell">밀양시</td>
+                    <td class="agency-cell"><span>밀양시자원봉사단체협의회</span><span>밀양노인통합지원센터</span><span>우리들노인통합지원센터</span>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="region-cell">의령군</td>
+                    <td class="agency-cell"><span>의령노인통합지원센터</span></td>
+                </tr>
+
+                <!-- 이정혜 담당 -->
+                <tr>
+                    <td rowspan="2" class="manager-cell">이정혜</td>
+                    <td class="region-cell">창원시</td>
+                    <td class="agency-cell">
+                        <span>동진노인통합지원센터</span><span>창원도우누리노인통합재가센터</span><span>명진노인통합지원센터</span><span>마산희망지역자활센터</span><span>마산회원노인종합복지관</span><span>정현사회적협동조합</span><span>진해서부노인종합복지관</span><span>진해노인종합복지관</span><span>경남노인통합지원센터</span><span>경남고용복지센터</span>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="region-cell">함양군</td>
+                    <td class="agency-cell"><span>사단법인 대한노인회 함양군지회</span></td>
+                </tr>
+
+                <!-- 신용기 담당 -->
+                <tr>
+                    <td rowspan="5" class="manager-cell">신용기</td>
+                    <td class="region-cell">통영시</td>
+                    <td class="agency-cell"><span>통영시종합사회복지관</span><span>통영노인통합지원센터</span></td>
+                </tr>
+                <tr>
+                    <td class="region-cell">하동군</td>
+                    <td class="agency-cell"><span>하동노인통합지원센터</span><span>경남하동지역자활센터</span></td>
+                </tr>
+                <tr>
+                    <td class="region-cell">거창군</td>
+                    <td class="agency-cell"><span>거창노인통합지원센터</span><span>거창인애노인통합지원센터</span><span>해월노인복지센터</span></td>
+                </tr>
+                <tr>
+                    <td class="region-cell">합천군</td>
+                    <td class="agency-cell"><span>합천노인통합지원센터</span><span>코끼리행복복지센터</span><span>사회적협동조합
+                            합천종합복지공동체</span><span>미타재가복지센터</span></td>
+                </tr>
+                <tr>
+                    <td class="region-cell">함안군</td>
+                    <td class="agency-cell"><span>(사)대한노인회 함안군지회</span><span>함안군재가노인통합지원센터</span></td>
+                </tr>
+
+                <!-- 박지영 담당 -->
+                <tr>
+                    <td rowspan="3" class="manager-cell">박지영</td>
+                    <td class="region-cell">거제시</td>
+                    <td class="agency-cell">
+                        <span>거제노인통합지원센터</span><span>거제사랑노인복지센터</span><span>하청교회행복늘푸른대학</span><span>은빛노인통합지원센터</span>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="region-cell">고성군</td>
+                    <td class="agency-cell"><span>대한노인회 고성군지회</span><span>사회적협동조합 노인세상</span></td>
+                </tr>
+                <tr>
+                    <td class="region-cell">진주시</td>
+                    <td class="agency-cell">
+                        <span>진양노인통합지원센터</span><span>진주노인통합지원센터</span><span>나누리노인통합지원센터</span><span>공덕의집노인통합지원센터</span><span>하늘마을노인통합지원센터</span>
+                    </td>
+                </tr>
+
+                <!-- 권기현 담당 -->
+                <tr>
+                    <td rowspan="4" class="manager-cell">권기현</td>
+                    <td class="region-cell">사천시</td>
+                    <td class="agency-cell">
+                        <span>사랑원노인지원센터</span><span>사천노인통합지원센터</span><span>남양양로원</span><span>사천건양주야간보호센터</span>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="region-cell">산청군</td>
+                    <td class="agency-cell">
+                        <span>산청한일노인통합지원센터</span><span>산청복음노인통합지원센터</span><span>산청해민노인통합지원센터</span><span>산청성모노인통합지원센터</span>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="region-cell">양산시</td>
+                    <td class="agency-cell"><span>사회복지법인신생원양산재가노인복지센터</span><span>양산행복한돌봄
+                            사회적협동조합</span><span>성요셉소규모노인종합센터</span></td>
+                </tr>
+                <tr>
+                    <td class="region-cell">창녕군</td>
+                    <td class="agency-cell"><span>사회적협동조합 창녕지역자활센터</span><span>창녕군새누리노인종합센터</span></td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="footer">
+            총 담당자 5명 / 시군 18개 / 수행기관 59개
+        </div>
+    </div>
+</body>
+
+</html>

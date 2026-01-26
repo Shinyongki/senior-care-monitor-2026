@@ -255,18 +255,30 @@ const PhoneMode: React.FC<PhoneModeProps> = ({
                   <div className="text-xs font-bold text-violet-700 mb-2 flex items-center gap-1">
                     🟣 연계서비스
                   </div>
-                  <div className="flex flex-wrap gap-2">
-                    {['주거개선', '생활지원'].map(item => (
-                      <label key={item} className="flex items-center gap-2 text-sm bg-white p-2 rounded border border-violet-100 hover:bg-violet-50 cursor-pointer">
-                        <input
-                          type="checkbox"
-                          checked={(formData.service_items || []).includes(item)}
-                          onChange={() => handleCheck(item)}
-                          className="rounded text-violet-600"
-                        />
-                        {item}
-                      </label>
-                    ))}
+                  <div className="flex flex-col gap-2">
+                    <div className="flex flex-wrap gap-2">
+                      {['주거개선', '생활지원', '의료지원', '행정지원', '민간후원', '기타'].map(item => (
+                        <label key={item} className="flex items-center gap-2 text-sm bg-white p-2 rounded border border-violet-100 hover:bg-violet-50 cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={(formData.service_items || []).includes(item)}
+                            onChange={() => handleCheck(item)}
+                            className="rounded text-violet-600"
+                          />
+                          {item}
+                        </label>
+                      ))}
+                    </div>
+                    {/* Input for '기타' Detail */}
+                    {(formData.service_items || []).includes('기타') && (
+                      <input
+                        type="text"
+                        value={formData.other_service_detail || ''}
+                        onChange={(e) => updateField('other_service_detail', e.target.value)}
+                        placeholder="기타 내용을 입력하세요"
+                        className="w-full mt-1 p-2 text-sm border border-violet-200 rounded focus:ring-2 focus:ring-violet-500 outline-none animate-fade-in"
+                      />
+                    )}
                   </div>
                 </div>
               </div>
@@ -338,7 +350,7 @@ const PhoneMode: React.FC<PhoneModeProps> = ({
                 onChange={(e) => updateField('safety_trend', e.target.value)}
                 rows={3}
                 className="w-full text-sm border-slate-300 rounded focus:ring-blue-500"
-                placeholder="예: 최근 허리 통증으로 거동 불편 호소, 보일러 소음 발생 등"
+                placeholder="예: [건강] 최근 입맛이 없어 식사량 급감, 허리 통증으로 거동 힘듦. [주거] 장마철 벽지 곰팡이 발생, 보일러 고장. [안전] 화장실 타일 미끄러움, 현관 계단 낙상 위험 등"
               />
             </div>
             <div>
@@ -348,7 +360,7 @@ const PhoneMode: React.FC<PhoneModeProps> = ({
                 onChange={(e) => updateField('special_notes', e.target.value)}
                 rows={3}
                 className="w-full text-sm border-slate-300 rounded focus:ring-blue-500"
-                placeholder="예: 병원 동행(내과) 일정 조율 필요, 김치/쌀 후원 요청 등"
+                placeholder="예: [지원요청] 겨울 이불 및 김장 김치 필요. [정서] 배우자 사별 후 우울감 심화, 자녀와 연락 두절. [민원] 방문 요양 서비스 시간 변경(오전→오후), 생활지원사 교체 요청 등"
               />
             </div>
           </div>
@@ -369,8 +381,8 @@ const PhoneMode: React.FC<PhoneModeProps> = ({
             </button>
           </div>
         </Card>
-      </div>
-    </div>
+      </div >
+    </div >
   );
 };
 

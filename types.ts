@@ -110,6 +110,7 @@ export interface FormDataState {
   safety_trend: string;
   special_notes: string;
   phone_indicators: Record<string, string>;
+  other_service_detail?: string;
 
   // 1st Visit Mode (Risk Screening)
   env_check: string[];

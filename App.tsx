@@ -404,25 +404,17 @@ const App: React.FC = () => {
       fileName = `(${dateStr})${region}_${agency}_유선모니터링_${name}`;
       subject = `${name} / ${dob} / ${formData.gender}`;
 
-      const indicators = PHONE_INDICATORS[formData.service_type as ServiceType] || [];
-      const indicatorText = indicators.map(ind =>
-        `- ${ind.label}: ${formData.phone_indicators?.[ind.id] || '미입력'}`
-      ).join('\n');
+      const serviceContent = formData.service_items.map(item =>
+        item === '기타' && formData.other_service_detail
+          ? `기타(${formData.other_service_detail})`
+          : item
+      ).join(', ') || '없음';
 
       summary = `■ 기본 정보
-- 서비스유형: ${formData.service_type}
-- 만족도: ${formData.satisfaction}
-- 제공서비스: ${formData.service_items.join(', ') || '없음'}
-- 제공빈도: 방문(${formData.visit_count}), 유선(${formData.call_count})
-
-■ 핵심 성과 점검
-${indicatorText || '(지표 미입력)'}
-
-■ 안전 동향
-${formData.safety_trend || '특이사항 없음'}
-
-■ 특이사항 및 민원
-${formData.special_notes || '없음'}`;
+- 서비스 만족: ${formData.satisfaction}
+- 서비스 내용: ${serviceContent}
+- 안전동향: ${formData.safety_trend || '특이사항 없음'}
+- 특이사항 및 민원: ${formData.special_notes || '없음'}`;
 
     } else if (formData.mon_method === '1차 대면') {
       // 2. 1st Visit Report
@@ -539,6 +531,7 @@ ${formData.interviewer_opinion || '(작성되지 않음)'}`;
         safety_trend: '',
         special_notes: '',
         phone_indicators: {},
+        other_service_detail: '',
         env_check: [],
         safety_check: [],
         body_status: '자유로운 보행 가능',

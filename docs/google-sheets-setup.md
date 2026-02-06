@@ -171,10 +171,13 @@ function buildRowData(data, mode) {
       data.Service_Items || '',
       data.Visit_Freq || '',
       data.Call_Freq || '',
-      data.Phone_Risk_Summary || '',
-      data.Phone_Notes || '',
-      data.Phone_Indicators_Json || '',
-      '' // 수행기관답변 초기값 (빈칸)
+      data.Gen_Stability || '',      // 생활 안정성
+      data.Gen_Loneliness || '',     // 고독감 해소
+      data.Gen_Safety || '',         // 안전망 체감도
+      data.Phone_Risk_Summary || '', // 안전동향
+      data.Phone_Notes || '',        // 특이사항
+      data.Is_RiskTarget || '',      // 1차대면 등록
+      ''                             // 수행기관답변 초기값 (빈칸)
     ];
   } else if (mode === 'visit') {
     // JSON 파싱 및 데이터 추출
@@ -256,7 +259,7 @@ function addHeaders(sheet, mode, serviceType) {
   var specificHeaders = [];
   
   if (mode === 'phone') {
-    specificHeaders = ['만족도', '서비스항목', '방문빈도', '전화빈도', '전화_위험요약', '전화_특이사항', '전화_지표JSON', '수행기관답변'];
+    specificHeaders = ['만족도', '서비스항목', '방문빈도', '전화빈도', '생활안정성', '고독감해소', '안전망체감도', '안전동향', '특이사항', '1차대면등록', '수행기관답변'];
   } else if (mode === 'visit') {
     // 공통 방문 헤더
     var visitCommon = ['환경위험', '안전위험', '신체상태', '방문등급', '방문_조치사항'];

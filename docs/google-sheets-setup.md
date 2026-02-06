@@ -344,7 +344,7 @@ function doGet(e) {
 4. **액세스 승인** 진행 (Google 계정 로그인)
 5. **웹 앱 URL 복사** 📋
 
-> **현재 배포 URL**: `https://script.google.com/macros/s/AKfycbzB5oAdzFrUhW0BEnqZn7ecLwWBllc-zQdZKtrYOwNSjgl2XPbQ2Yp8Qd1PygbPaRxikw/exec`
+> **현재 배포 URL**: `https://script.google.com/macros/s/AKfycbzGdQ6jmam7HHyaU8FPvuHHg-CrMQ0qxkd2SUag829Yz6RW0mv5rzWozjFL_JZMKZG1zg/exec`
 
 ---
 

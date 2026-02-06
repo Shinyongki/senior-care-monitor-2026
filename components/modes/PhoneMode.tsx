@@ -44,7 +44,7 @@ const PhoneMode: React.FC<PhoneModeProps> = ({
 
     updateField('satisfaction', record.satisfaction || '만족');
     updateField('service_items', record.service_items || []);
-    updateField('visit_count', record.visit_count || '주 1회 이상');
+    updateField('visit_count', record.visit_count || '주 1회');
     updateField('call_count', record.call_count || '주 1회');
     updateField('phone_indicators', record.phone_indicators || {});
 

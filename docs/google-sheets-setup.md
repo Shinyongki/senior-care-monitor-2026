@@ -160,6 +160,8 @@ function buildRowData(data, mode) {
     data.Name || '',
     data.Gender || '',
     data.Birth_Year || '',
+    data.Birth_Month || '',
+    data.Birth_Day || '',
     data.Age_Group || ''
   ];
   
@@ -263,7 +265,7 @@ function buildRowData(data, mode) {
 function addHeaders(sheet, mode, serviceType) {
   var commonHeaders = [
     '저장시각', '조사일자', '담당자', '시군', '수행기관', '모니터링방법', 
-    '서비스유형', '대상자명', '성별', '출생연도', '연령대'
+    '서비스유형', '대상자명', '성별', '출생연도', '출생월', '출생일', '연령대'
   ];
   
   var specificHeaders = [];

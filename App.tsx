@@ -415,6 +415,8 @@ const App: React.FC = () => {
       summary = `■ 기본 정보
 - 서비스 만족: ${formData.satisfaction}
 - 서비스 내용: ${serviceContent}
+- 방문빈도: ${formData.visit_count}
+- 유선빈도: ${formData.call_count}
 - 안전동향: ${formData.safety_trend || '특이사항 없음'}
 - 특이사항 및 민원: ${formData.special_notes || '없음'}`;
 

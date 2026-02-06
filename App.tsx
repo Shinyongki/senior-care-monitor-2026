@@ -36,7 +36,9 @@ const App: React.FC = () => {
   };
 
   // Persisted Data
-  const [scriptUrl, setScriptUrl] = useState<string>(() => localStorage.getItem('googleSheetUrl') || '');
+  // 하드코딩된 기본 Google Apps Script URL (항상 동일한 시트 사용)
+  const DEFAULT_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxbirFGNYmEwE-Uohqeq4ZtOX6NJng_6iZOriUYIGZo7RMdQWzFDmUvR_1IouYtr991fw/exec';
+  const [scriptUrl, setScriptUrl] = useState<string>(() => localStorage.getItem('googleSheetUrl') || DEFAULT_SCRIPT_URL);
 
   const [hypotheses, setHypotheses] = useState<Hypothesis[]>(() => {
     const saved = localStorage.getItem('hypotheses');
@@ -401,7 +403,7 @@ const App: React.FC = () => {
 
     if (formData.mon_method === '유선(매월)') {
       // 1. Phone Mode Report
-      fileName = `(${dateStr})${region}_${agency}_유선모니터링_${name}`;
+      fileName = `(${dateStr})${region}_${agency}`;
       subject = `${name} / ${dob} / ${formData.gender}`;
 
       const serviceContent = formData.service_items.map(item =>

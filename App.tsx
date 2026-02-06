@@ -406,17 +406,19 @@ const App: React.FC = () => {
       fileName = `(${dateStr})${region}_${agency}`;
       subject = `${name} / ${dob} / ${formData.gender}`;
 
-      const serviceContent = formData.service_items.map(item =>
-        item === '기타' && formData.other_service_detail
-          ? `기타(${formData.other_service_detail})`
-          : item
-      ).join(', ') || '없음';
+      const serviceContent = [
+        ...formData.service_items.map(item =>
+          item === '기타' && formData.other_service_detail
+            ? `기타(${formData.other_service_detail})`
+            : item
+        ),
+        `${formData.visit_count} 방문`,
+        `${formData.call_count} 유선`
+      ].join(', ') || '없음';
 
       summary = `■ 기본 정보
 - 서비스 만족: ${formData.satisfaction}
 - 서비스 내용: ${serviceContent}
-- 방문빈도: ${formData.visit_count}
-- 유선빈도: ${formData.call_count}
 - 안전동향: ${formData.safety_trend || '특이사항 없음'}
 - 특이사항 및 민원: ${formData.special_notes || '없음'}`;
 

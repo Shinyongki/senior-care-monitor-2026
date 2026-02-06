@@ -406,6 +406,14 @@ const App: React.FC = () => {
       fileName = `(${dateStr})${region}_${agency}`;
       subject = `${name} / ${dob} / ${formData.gender}`;
 
+      // 유선빈도 포맷 변환
+      const formatCallCount = (count: string) => {
+        if (count === '자주') return '자주 유선전화';
+        if (count === '매일') return '매일 유선전화';
+        if (count === '미제공') return '전화오지 않음';
+        return `${count} 유선`;
+      };
+
       const serviceContent = [
         ...formData.service_items.map(item =>
           item === '기타' && formData.other_service_detail
@@ -413,7 +421,7 @@ const App: React.FC = () => {
             : item
         ),
         `${formData.visit_count} 방문`,
-        `${formData.call_count} 유선`
+        formatCallCount(formData.call_count)
       ].join(', ') || '없음';
 
       summary = `■ 기본 정보

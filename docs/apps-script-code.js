@@ -142,9 +142,19 @@ function buildRowData(data, mode) {
             data.Service_Items || '',
             data.Visit_Freq || '',
             data.Call_Freq || '',
+            // 일반 서비스 지표
             data.Gen_Stability || '',      // 생활 안정성
             data.Gen_Loneliness || '',     // 고독감 해소
             data.Gen_Safety || '',         // 안전망 체감도
+            // 퇴원환자 단기 집중 지표
+            data.Hosp_Indep || '',         // 초기 안착 및 자립
+            data.Hosp_Anxiety || '',       // 재입원 불안 해소
+            data.Hosp_Sat || '',           // 가사/신체지원 만족
+            // 특화서비스 지표
+            data.Spec_Emotion || '',       // 정서적 변화
+            data.Spec_Social || '',        // 사회적 관계 형성
+            data.Spec_Sat || '',           // 프로그램 만족도
+            // 공통 필드
             data.Phone_Risk_Summary || '', // 안전동향
             data.Phone_Notes || '',        // 특이사항
             data.Is_RiskTarget || '',      // 1차대면 등록
@@ -230,7 +240,17 @@ function addHeaders(sheet, mode, serviceType) {
     var specificHeaders = [];
 
     if (mode === 'phone') {
-        specificHeaders = ['만족도', '서비스항목', '방문빈도', '전화빈도', '생활안정성', '고독감해소', '안전망체감도', '안전동향', '특이사항', '1차대면등록', '수행기관답변'];
+        specificHeaders = [
+            '만족도', '서비스항목', '방문빈도', '전화빈도',
+            // 일반 서비스 지표
+            '(일반)생활안정성', '(일반)고독감해소', '(일반)안전망체감도',
+            // 퇴원환자 단기 집중 지표
+            '(퇴원)초기안착자립', '(퇴원)재입원불안해소', '(퇴원)가사신체지원만족',
+            // 특화서비스 지표
+            '(특화)정서적변화', '(특화)사회적관계형성', '(특화)프로그램만족도',
+            // 공통 필드
+            '안전동향', '특이사항', '1차대면등록', '수행기관답변'
+        ];
     } else if (mode === 'visit') {
         // 공통 방문 헤더
         var visitCommon = ['환경위험', '안전위험', '신체상태', '방문등급', '방문_조치사항'];

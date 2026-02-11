@@ -8,6 +8,10 @@ function doPost(e) {
             return handleUpdateResponse(spreadsheet, data);
         }
 
+        if (data.action === 'updateRow') {
+            return handleUpdateRow(spreadsheet, data);
+        }
+
         // 기본 저장 로직
         // 1. 메인 모드 시트에 저장 (서비스 유형에 따라 시트 분리)
         var mainSheetName = getSheetName(data.Mode, data.Service_Type);
@@ -87,6 +91,36 @@ function findRowByName(sheet, name) {
 function ErrorResponse(msg) {
     return ContentService
         .createTextOutput(JSON.stringify({ success: false, error: msg }))
+        .setMimeType(ContentService.MimeType.JSON);
+}
+
+// 행 업데이트 핸들러 (기존 데이터 덮어쓰기)
+function handleUpdateRow(spreadsheet, data) {
+    var row = Number(data.rowNumber);
+    if (!row || row < 2) return ErrorResponse('유효하지 않은 행 번호입니다.');
+
+    var mainSheet = spreadsheet.getSheetByName('유선(매월)');
+    if (!mainSheet) return ErrorResponse('유선(매월) 시트를 찾을 수 없습니다.');
+
+    // 기존 행 데이터를 새 데이터로 덮어쓰기
+    var rowData = buildRowData(data, data.Mode || 'phone');
+    var range = mainSheet.getRange(row, 1, 1, rowData.length);
+    range.setValues([rowData]);
+
+    // 담당자 시트도 동기화
+    if (data.Author) {
+        var authorSheet = spreadsheet.getSheetByName(data.Author);
+        if (authorSheet) {
+            var targetRow = findRowByName(authorSheet, data.Name);
+            if (targetRow > 0) {
+                var authorRange = authorSheet.getRange(targetRow, 1, 1, rowData.length);
+                authorRange.setValues([rowData]);
+            }
+        }
+    }
+
+    return ContentService
+        .createTextOutput(JSON.stringify({ success: true, message: '기존 기록이 수정되었습니다.' }))
         .setMimeType(ContentService.MimeType.JSON);
 }
 
@@ -294,5 +328,73 @@ function addHeaders(sheet, mode, serviceType) {
 }
 
 function doGet(e) {
-    return ContentService.createTextOutput("노인돌봄 모니터링 시스템 API가 작동 중입니다.");
+    var action = (e && e.parameter && e.parameter.action) ? e.parameter.action : '';
+
+    if (action === 'getData') {
+        try {
+            var spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
+            var sheet = spreadsheet.getSheetByName('유선(매월)');
+
+            if (!sheet) {
+                return ContentService
+                    .createTextOutput(JSON.stringify({ success: false, error: '유선(매월) 시트를 찾을 수 없습니다.' }))
+                    .setMimeType(ContentService.MimeType.JSON);
+            }
+
+            var data = sheet.getDataRange().getValues();
+            if (data.length < 2) {
+                return ContentService
+                    .createTextOutput(JSON.stringify({ success: true, data: [] }))
+                    .setMimeType(ContentService.MimeType.JSON);
+            }
+
+            var headers = data[0];
+            // 헤더를 영문 키로 매핑 (프론트엔드와 일치)
+            var headerMap = {
+                '저장시각': 'Timestamp',
+                '조사일자': 'Survey_Date',
+                '담당자': 'Author',
+                '시군': 'Region',
+                '수행기관': 'Agency',
+                '모니터링방법': 'Mode',
+                '서비스유형': 'Service_Type',
+                '대상자명': 'Name',
+                '성별': 'Gender',
+                '출생연도': 'Birth_Year',
+                '출생월': 'Birth_Month',
+                '출생일': 'Birth_Day',
+                '연령대': 'Age_Group',
+                '만족도': 'Satisfaction',
+                '서비스항목': 'Service_Items',
+                '방문빈도': 'Visit_Freq',
+                '전화빈도': 'Call_Freq',
+                '안전동향': 'Phone_Risk_Summary',
+                '특이사항': 'Phone_Notes',
+                '1차대면등록': 'Is_RiskTarget',
+                '수행기관답변': 'Agency_Response'
+            };
+
+            var rows = [];
+            for (var i = 1; i < data.length; i++) {
+                var obj = { rowNumber: i + 1 }; // 실제 시트 행 번호 (1-indexed, 헤더 건너뜀)
+                for (var j = 0; j < headers.length; j++) {
+                    var key = headerMap[headers[j]] || headers[j];
+                    obj[key] = data[i][j] !== undefined ? String(data[i][j]) : '';
+                }
+                rows.push(obj);
+            }
+
+            return ContentService
+                .createTextOutput(JSON.stringify({ success: true, data: rows }))
+                .setMimeType(ContentService.MimeType.JSON);
+
+        } catch (error) {
+            return ContentService
+                .createTextOutput(JSON.stringify({ success: false, error: error.toString() }))
+                .setMimeType(ContentService.MimeType.JSON);
+        }
+    }
+
+    // 기본 헬스체크
+    return ContentService.createTextOutput('노인돌봄 모니터링 시스템 API가 작동 중입니다.');
 }

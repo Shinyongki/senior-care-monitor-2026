@@ -131,20 +131,33 @@ export const fetchSheetData = async (scriptUrl: string): Promise<{ success: bool
   if (!scriptUrl) return { success: false, message: 'API URL이 설정되지 않았습니다.' };
 
   try {
+    // Use POST with action: 'getData' since doGet only returns a health check message
     const response = await fetch(scriptUrl, {
-      method: 'GET',
-      mode: 'cors',
+      method: 'POST',
+      mode: 'no-cors',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ action: 'getData' }),
     });
 
-    const text = await response.text();
+    // no-cors mode returns opaque response, so we cannot read the body directly.
+    // Instead, use a redirect-based approach with GET + query parameter
+    // Fallback: try GET with action parameter
+    const getResponse = await fetch(`${scriptUrl}?action=getData`, {
+      method: 'GET',
+      redirect: 'follow',
+    });
+
+    const text = await getResponse.text();
     let result;
     try {
       result = JSON.parse(text);
     } catch (e) {
-      console.error('JSON Parse Error:', text.substring(0, 100)); // Log first 100 chars
+      console.error('JSON Parse Error:', text.substring(0, 100));
       return {
         success: false,
-        message: '구글 시트 응답이 올바르지 않습니다. (HTML 수신됨)\n\n[해결책]\n1. 앱스 스크립트 배포 시 "권한: 누구나(Anyone)"로 설정했는지 확인하세요.\n2. 로그인이 필요한 페이지로 리다이렉트되고 있을 수 있습니다.'
+        message: '구글 시트에서 데이터를 불러올 수 없습니다.\n\n앱스 스크립트의 doGet 함수에 getData 액션 처리가 필요합니다.\n\n현재 응답: ' + text.substring(0, 50)
       };
     }
 

@@ -515,6 +515,8 @@ ${formData.interviewer_opinion || '(작성되지 않음)'}`;
     updateField('name', record.name);
     updateField('gender', record.gender);
     updateField('birth_year', record.birth_year);
+    updateField('birth_month', record.birth_month || '01');
+    updateField('birth_day', record.birth_day || '01');
     updateField('agency', record.agency);
     updateField('service_type', record.service_type || '일반 서비스');
     updateField('satisfaction', record.satisfaction);
@@ -528,56 +530,71 @@ ${formData.interviewer_opinion || '(작성되지 않음)'}`;
     showToast(`✏️ '${record.name}' 어르신의 기록을 수정합니다. 수정 후 저장 버튼을 눌러주세요.`, 'info');
   };
 
-  // Load Sheet Data
+  // Shared: Map sheet row to PhoneCallRecord
+  const mapRowToRecord = (row: any, index: number): PhoneCallRecord => ({
+    id: Date.now() + index,
+    rowNumber: row.rowNumber,
+    name: row.Name,
+    gender: row.Gender,
+    birth_year: row.Birth_Year,
+    birth_month: row.Birth_Month || '01',
+    birth_day: row.Birth_Day || '01',
+    agency: row.Agency,
+    service_type: row.Service_Type,
+    date: row.Survey_Date,
+    status: row.Phone_Risk_Summary ? 'risk' as const : 'completed' as const,
+    summary: row.Phone_Risk_Summary || '특이사항 없음',
+    satisfaction: row.Satisfaction,
+    service_items: row.Service_Items ? row.Service_Items.split(', ') : [],
+    visit_count: row.Visit_Freq,
+    call_count: row.Call_Freq,
+    phone_indicators: row.Phone_Indicators_Json ? (() => { try { return JSON.parse(row.Phone_Indicators_Json); } catch { return {}; } })() : {},
+    safety_trend: row.Phone_Risk_Summary,
+    special_notes: row.Phone_Notes
+  });
+
+  // Load Sheet Data (filtered by author)
   const handleLoadSheetData = async () => {
     if (!formData.author) {
       showToast('담당자를 먼저 선택해주세요.', 'error');
       return;
     }
+    await loadSheetRecords(formData.author);
+  };
 
+  // Load All Sheet Data (no filter)
+  const handleLoadAllData = async () => {
+    await loadSheetRecords(null);
+  };
+
+  // Core loader
+  const loadSheetRecords = async (authorFilter: string | null) => {
     if (!scriptUrl) {
       showToast('구글 시트 연동 URL이 없습니다.', 'error');
       return;
     }
 
     setIsSyncing(true);
-    showToast(`${formData.author}님의 기록을 불러오는 중...`, 'info');
+    showToast(authorFilter ? `${authorFilter}님의 기록을 불러오는 중...` : '전체 기록을 불러오는 중...', 'info');
 
     try {
       const response = await fetchSheetData(scriptUrl);
 
       if (response.success && response.data) {
-        // Filter by Author and Mode 'phone'
-        const myRecords = response.data
-          .filter((row: any) =>
-            row.Author === formData.author &&
-            (row.Mode === 'phone' || row.Mode === '유선(매월)')
-          )
-          .map((row: any, index: number) => ({
-            id: Date.now() + index, // Temp ID for local key
-            rowNumber: row.rowNumber, // Important: Save row number for updates
-            name: row.Name,
-            gender: row.Gender,
-            birth_year: row.Birth_Year,
-            agency: row.Agency,
-            service_type: row.Service_Type,
-            date: row.Survey_Date,
-            status: row.Phone_Risk_Summary ? 'risk' as const : 'completed' as const,
-            summary: row.Phone_Risk_Summary || '특이사항 없음',
-            satisfaction: row.Satisfaction,
-            service_items: row.Service_Items ? row.Service_Items.split(', ') : [],
-            visit_count: row.Visit_Freq,
-            call_count: row.Call_Freq,
-            phone_indicators: row.Phone_Indicators_Json ? JSON.parse(row.Phone_Indicators_Json) : {},
-            safety_trend: row.Phone_Risk_Summary,
-            special_notes: row.Phone_Notes
-          }));
+        const records = response.data
+          .filter((row: any) => {
+            const isPhone = row.Mode === 'phone' || row.Mode === '유선(매월)';
+            if (!isPhone) return false;
+            if (authorFilter) return row.Author === authorFilter;
+            return true;
+          })
+          .map(mapRowToRecord);
 
-        if (myRecords.length === 0) {
+        if (records.length === 0) {
           showToast('불러올 기록이 없습니다.', 'info');
         } else {
-          setPhoneLog(myRecords); // Replace current list
-          showToast(`${myRecords.length}건의 기록을 불러왔습니다.`, 'success');
+          setPhoneLog(records);
+          showToast(`${records.length}건의 기록을 불러왔습니다.`, 'success');
         }
       } else {
         showToast(response.message || '데이터를 불러오는데 실패했습니다.', 'error');
@@ -796,6 +813,7 @@ ${formData.interviewer_opinion || '(작성되지 않음)'}`;
             themeText={getThemeText()}
             themeBorder={getThemeBorder()}
             onLoadData={handleLoadSheetData}
+            onLoadAll={handleLoadAllData}
           />
         )}
 

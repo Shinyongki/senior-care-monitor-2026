@@ -9,9 +9,10 @@ interface BasicInfoProps {
   themeText: string;
   themeBorder: string;
   onLoadData?: () => void;
+  onLoadAll?: () => void;
 }
 
-const BasicInfo: React.FC<BasicInfoProps> = ({ formData, updateField, themeText, themeBorder, onLoadData }) => {
+const BasicInfo: React.FC<BasicInfoProps> = ({ formData, updateField, themeText, themeBorder, onLoadData, onLoadAll }) => {
   const [agencyList, setAgencyList] = useState<string[]>([]);
 
   // Agency Update Logic & Auto Select
@@ -85,14 +86,23 @@ const BasicInfo: React.FC<BasicInfoProps> = ({ formData, updateField, themeText,
       <div className="flex items-center gap-2 mb-4">
         <span className="bg-slate-100 p-2 rounded-lg text-slate-600"><User size={20} /></span>
         <h3 className="text-lg font-bold text-slate-800">기본 정보</h3>
-        {/* Load Data Button */}
+        {/* Load Data Buttons */}
         {onLoadData && formData.author && (
           <button
             onClick={onLoadData}
             className="ml-auto px-3 py-1.5 text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-lg shadow-sm transition-colors flex items-center gap-1"
             title={`${formData.author} 담당자의 기록을 시트에서 불러옵니다.`}
           >
-            📂 내 목록 불러오기
+            📂 내 목록
+          </button>
+        )}
+        {onLoadAll && (
+          <button
+            onClick={onLoadAll}
+            className={`${onLoadData && formData.author ? '' : 'ml-auto'} px-3 py-1.5 text-xs font-bold text-slate-700 bg-slate-200 hover:bg-slate-300 rounded-lg shadow-sm transition-colors flex items-center gap-1`}
+            title="전체 기록을 시트에서 불러옵니다."
+          >
+            📋 전체 목록
           </button>
         )}
       </div>

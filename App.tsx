@@ -524,6 +524,29 @@ ${formData.interviewer_opinion || '(작성되지 않음)'}`;
     if (result.success) {
       showToast(result.message, 'success');
 
+      // Add to local phoneLog if in Phone Mode
+      if (formData.mon_method === '유선(매월)') {
+        const newRecord: PhoneCallRecord = {
+          id: Date.now(),
+          name: formData.name,
+          gender: formData.gender,
+          birth_year: formData.birth_year,
+          agency: formData.agency,
+          service_type: formData.service_type,
+          date: formData.survey_date,
+          status: formData.is_risk_target ? 'risk' : 'completed',
+          summary: formData.safety_trend ? (formData.safety_trend.length > 20 ? formData.safety_trend.substring(0, 20) + '...' : formData.safety_trend) : '특이사항 없음',
+          satisfaction: formData.satisfaction,
+          service_items: formData.service_items,
+          visit_count: formData.visit_count,
+          call_count: formData.call_count,
+          phone_indicators: formData.phone_indicators,
+          safety_trend: formData.safety_trend,
+          special_notes: formData.special_notes
+        };
+        setPhoneLog(prev => [newRecord, ...prev]);
+      }
+
       // Reset form for new entry (keep author and region)
       const savedAuthor = formData.author;
       const savedRegion = formData.region;

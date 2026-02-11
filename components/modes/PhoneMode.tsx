@@ -3,7 +3,7 @@ import React from 'react';
 import { Card } from '../ui/Card';
 import { FormDataState, ServiceType, RiskTarget, PhoneCallRecord } from '../../types';
 import { PHONE_INDICATORS } from '../../constants';
-import { Zap, AlertTriangle, ArrowRight, CheckCircle2, PhoneIncoming, AlertCircle } from 'lucide-react';
+import { Zap, AlertTriangle, ArrowRight, CheckCircle2, PhoneIncoming, AlertCircle, Trash2, Edit2 } from 'lucide-react';
 
 interface PhoneModeProps {
   formData: FormDataState;
@@ -12,10 +12,12 @@ interface PhoneModeProps {
   setRiskTargets: React.Dispatch<React.SetStateAction<RiskTarget[]>>;
   phoneLog?: PhoneCallRecord[]; // Optional for backward compatibility
   showToast: (msg: string, type?: 'success' | 'error' | 'info') => void;
+  onDelete?: (id: number) => void;
+  onEdit?: (record: PhoneCallRecord) => void;
 }
 
 const PhoneMode: React.FC<PhoneModeProps> = ({
-  formData, updateField, riskTargets, setRiskTargets, phoneLog = [], showToast
+  formData, updateField, riskTargets, setRiskTargets, phoneLog = [], showToast, onDelete, onEdit
 }) => {
 
   const handleCheck = (val: string) => {
@@ -100,6 +102,23 @@ const PhoneMode: React.FC<PhoneModeProps> = ({
     showToast(`🚩 '${formData.name}' 어르신을 1차 대면 대상자로 등록했습니다. (사유: ${riskSummary})`, 'success');
   };
 
+  // Admin Mode Trigger
+  const [isAdminMode, setIsAdminMode] = React.useState(false);
+  const [clickCount, setClickCount] = React.useState(0);
+
+  const handleTitleClick = () => {
+    if (isAdminMode) return;
+    setClickCount(prev => {
+      const newCount = prev + 1;
+      if (newCount >= 5) {
+        setIsAdminMode(true);
+        showToast('🔓 관리자 모드가 활성화되었습니다. (수정/삭제 가능)', 'info');
+        return 0;
+      }
+      return newCount;
+    });
+  };
+
   // Get current indicators based on service type
   const currentIndicators = PHONE_INDICATORS[formData.service_type as ServiceType] || PHONE_INDICATORS['일반 서비스'];
 
@@ -108,13 +127,18 @@ const PhoneMode: React.FC<PhoneModeProps> = ({
 
       {/* Sidebar: Monitoring List */}
       <div className="lg:col-span-1 order-2 lg:order-1">
-        <Card title={`대상자 모니터링 목록 (${phoneLog.length}명)`} color="blue" className="h-full max-h-[800px] flex flex-col">
+        <Card
+          title={`대상자 모니터링 목록 (${phoneLog.length}명) ${isAdminMode ? '🔓' : ''}`}
+          color="blue"
+          className="h-full max-h-[800px] flex flex-col"
+          onTitleClick={handleTitleClick} // Trigger Admin Mode
+        >
           <div className="flex-1 overflow-y-auto custom-scrollbar pr-2 space-y-2">
             {phoneLog.length > 0 ? phoneLog.map(record => (
               <div
                 key={record.id}
                 onClick={() => loadRecord(record)}
-                className={`p-3 rounded-lg border cursor-pointer transition-all hover:scale-[1.02] ${record.status === 'risk'
+                className={`p-3 rounded-lg border cursor-pointer transition-all hover:scale-[1.02] relative group ${record.status === 'risk'
                   ? 'bg-red-50 border-red-200 hover:bg-red-100'
                   : 'bg-white border-slate-100 hover:bg-blue-50 hover:border-blue-200'
                   }`}
@@ -132,6 +156,26 @@ const PhoneMode: React.FC<PhoneModeProps> = ({
                 {record.status === 'risk' && (
                   <div className="text-[10px] text-red-500 flex items-center gap-1">
                     <AlertCircle size={10} /> {record.summary}
+                  </div>
+                )}
+
+                {/* Admin Controls */}
+                {isAdminMode && (
+                  <div className="absolute top-2 right-2 flex gap-1 bg-white/90 p-1 rounded-md shadow-sm opacity-90 hover:opacity-100 transition-opacity">
+                    <button
+                      onClick={(e) => { e.stopPropagation(); onEdit?.(record); }}
+                      className="p-1 hover:bg-blue-100 rounded text-blue-600"
+                      title="수정"
+                    >
+                      <Edit2 size={14} />
+                    </button>
+                    <button
+                      onClick={(e) => { e.stopPropagation(); onDelete?.(record.id); }}
+                      className="p-1 hover:bg-red-100 rounded text-red-600"
+                      title="삭제"
+                    >
+                      <Trash2 size={14} />
+                    </button>
                   </div>
                 )}
               </div>

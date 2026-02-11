@@ -492,6 +492,36 @@ ${formData.interviewer_opinion || '(작성되지 않음)'}`;
     showToast('📋 클립보드에 복사되었습니다.', 'info');
   };
 
+  // New: Editing State
+  const [editingId, setEditingId] = useState<number | null>(null);
+
+  const handleDeleteLog = (id: number) => {
+    if (confirm('정말로 이 기록을 삭제하시겠습니까? (로컬 목록에서만 삭제됩니다)')) {
+      setPhoneLog(prev => prev.filter(log => log.id !== id));
+      showToast('🗑️ 기록이 삭제되었습니다.', 'info');
+    }
+  };
+
+  const handleEditLog = (record: PhoneCallRecord) => {
+    setEditingId(record.id);
+
+    // Load record data into form
+    updateField('name', record.name);
+    updateField('gender', record.gender);
+    updateField('birth_year', record.birth_year);
+    updateField('agency', record.agency);
+    updateField('service_type', record.service_type || '일반 서비스');
+    updateField('satisfaction', record.satisfaction);
+    updateField('service_items', record.service_items || []);
+    updateField('visit_count', record.visit_count || '주 1회');
+    updateField('call_count', record.call_count || '주 1회');
+    updateField('phone_indicators', record.phone_indicators || {});
+    updateField('safety_trend', record.safety_trend);
+    updateField('special_notes', record.special_notes);
+
+    showToast(`✏️ '${record.name}' 어르신의 기록을 수정합니다. 수정 후 저장 버튼을 눌러주세요.`, 'info');
+  };
+
   // Modified Save Function: Local + Google Sheet
   const handleSave = async () => {
     if (formData.mon_method === '온라인설문') {
@@ -523,7 +553,7 @@ ${formData.interviewer_opinion || '(작성되지 않음)'}`;
       // Add to local phoneLog if in Phone Mode
       if (formData.mon_method === '유선(매월)') {
         const newRecord: PhoneCallRecord = {
-          id: Date.now(),
+          id: editingId || Date.now(), // Use existing ID if editing
           name: formData.name,
           gender: formData.gender,
           birth_year: formData.birth_year,
@@ -540,7 +570,15 @@ ${formData.interviewer_opinion || '(작성되지 않음)'}`;
           safety_trend: formData.safety_trend,
           special_notes: formData.special_notes
         };
-        setPhoneLog(prev => [newRecord, ...prev]);
+
+        if (editingId) {
+          // Update existing record
+          setPhoneLog(prev => prev.map(log => log.id === editingId ? newRecord : log));
+          setEditingId(null); // Reset editing state
+        } else {
+          // Add new record
+          setPhoneLog(prev => [newRecord, ...prev]);
+        }
       }
 
       // Reset form for new entry (keep author and region)
@@ -689,6 +727,8 @@ ${formData.interviewer_opinion || '(작성되지 않음)'}`;
               setRiskTargets={setRiskTargets}
               phoneLog={phoneLog} // Pass phone log
               showToast={showToast}
+              onDelete={handleDeleteLog}
+              onEdit={handleEditLog}
             />
           )}
 

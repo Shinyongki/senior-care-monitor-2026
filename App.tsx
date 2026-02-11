@@ -427,12 +427,10 @@ const App: React.FC = () => {
       summary = `■ 기본 정보
 - 서비스 만족: ${formData.satisfaction}
 - 서비스 내용: ${serviceContent}
-
 - 안전동향
-${formData.safety_trend || ' 특이사항 없음'}
-
+${formData.safety_trend || '특이사항 없음'}
 - 특이사항
-${formData.special_notes || ' 없음'}`;
+${formData.special_notes || '없음'}`;
 
     } else if (formData.mon_method === '1차 대면') {
       // 2. 1st Visit Report

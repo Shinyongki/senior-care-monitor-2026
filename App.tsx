@@ -496,10 +496,16 @@ ${formData.interviewer_opinion || '(작성되지 않음)'}`;
   const [editingId, setEditingId] = useState<number | null>(null);
 
   const handleDeleteLog = (id: number) => {
-    if (confirm('정말로 이 기록을 삭제하시겠습니까? (로컬 목록에서만 삭제됩니다)')) {
-      setPhoneLog(prev => prev.filter(log => log.id !== id));
-      showToast('🗑️ 기록이 삭제되었습니다.', 'info');
-    }
+    console.log('Delete requested for ID:', id);
+    // Removed confirm dialog to rule out environment blocking issues
+    // if (confirm('정말로 이 기록을 삭제하시겠습니까? (로컬 목록에서만 삭제됩니다)')) {
+    setPhoneLog(prev => {
+      const newLog = prev.filter(log => log.id !== id);
+      console.log('Previous length:', prev.length, 'New length:', newLog.length);
+      return newLog;
+    });
+    showToast('🗑️ 기록이 삭제되었습니다.', 'info');
+    // }
   };
 
   const handleEditLog = (record: PhoneCallRecord) => {

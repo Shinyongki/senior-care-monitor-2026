@@ -136,7 +136,17 @@ export const fetchSheetData = async (scriptUrl: string): Promise<{ success: bool
       mode: 'cors',
     });
 
-    const result = await response.json();
+    const text = await response.text();
+    let result;
+    try {
+      result = JSON.parse(text);
+    } catch (e) {
+      console.error('JSON Parse Error:', text.substring(0, 100)); // Log first 100 chars
+      return {
+        success: false,
+        message: '구글 시트 응답이 올바르지 않습니다. (HTML 수신됨)\n\n[해결책]\n1. 앱스 스크립트 배포 시 "권한: 누구나(Anyone)"로 설정했는지 확인하세요.\n2. 로그인이 필요한 페이지로 리다이렉트되고 있을 수 있습니다.'
+      };
+    }
 
     if (result.success) {
       return { success: true, data: result.data };

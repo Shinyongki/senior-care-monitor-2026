@@ -371,7 +371,17 @@ function doGet(e) {
                 '안전동향': 'Phone_Risk_Summary',
                 '특이사항': 'Phone_Notes',
                 '1차대면등록': 'Is_RiskTarget',
-                '수행기관답변': 'Agency_Response'
+                '수행기관답변': 'Agency_Response',
+                // 개별 지표 컬럼
+                '(일반)생활안정성': 'Gen_Stability',
+                '(일반)고독감해소': 'Gen_Loneliness',
+                '(일반)안전망체감도': 'Gen_Safety',
+                '(퇴원)초기안착자립': 'Hosp_Indep',
+                '(퇴원)재입원불안해소': 'Hosp_Anxiety',
+                '(퇴원)가사신체지원만족': 'Hosp_Sat',
+                '(특화)정서적변화': 'Spec_Emotion',
+                '(특화)사회적관계형성': 'Spec_Social',
+                '(특화)프로그램만족도': 'Spec_Sat'
             };
 
             var rows = [];

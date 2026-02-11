@@ -531,14 +531,15 @@ ${formData.interviewer_opinion || '(작성되지 않음)'}`;
   };
 
   // Shared: Map sheet row to PhoneCallRecord
+  const padTwo = (v: any) => String(v || '01').padStart(2, '0');
   const mapRowToRecord = (row: any, index: number): PhoneCallRecord => ({
     id: Date.now() + index,
     rowNumber: row.rowNumber,
     name: row.Name,
     gender: row.Gender,
     birth_year: row.Birth_Year,
-    birth_month: row.Birth_Month || '01',
-    birth_day: row.Birth_Day || '01',
+    birth_month: padTwo(row.Birth_Month),
+    birth_day: padTwo(row.Birth_Day),
     agency: row.Agency,
     service_type: row.Service_Type,
     date: row.Survey_Date,
@@ -548,7 +549,18 @@ ${formData.interviewer_opinion || '(작성되지 않음)'}`;
     service_items: row.Service_Items ? row.Service_Items.split(', ') : [],
     visit_count: row.Visit_Freq,
     call_count: row.Call_Freq,
-    phone_indicators: row.Phone_Indicators_Json ? (() => { try { return JSON.parse(row.Phone_Indicators_Json); } catch { return {}; } })() : {},
+    // Reconstruct phone_indicators from individual columns
+    phone_indicators: {
+      ...(row.Gen_Stability ? { gen_stability: row.Gen_Stability } : {}),
+      ...(row.Gen_Loneliness ? { gen_loneliness: row.Gen_Loneliness } : {}),
+      ...(row.Gen_Safety ? { gen_safety: row.Gen_Safety } : {}),
+      ...(row.Hosp_Indep ? { hosp_indep: row.Hosp_Indep } : {}),
+      ...(row.Hosp_Anxiety ? { hosp_anxiety: row.Hosp_Anxiety } : {}),
+      ...(row.Hosp_Sat ? { hosp_sat: row.Hosp_Sat } : {}),
+      ...(row.Spec_Emotion ? { spec_emotion: row.Spec_Emotion } : {}),
+      ...(row.Spec_Social ? { spec_social: row.Spec_Social } : {}),
+      ...(row.Spec_Sat ? { spec_sat: row.Spec_Sat } : {}),
+    },
     safety_trend: row.Phone_Risk_Summary,
     special_notes: row.Phone_Notes
   });

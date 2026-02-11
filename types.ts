@@ -34,6 +34,7 @@ export interface PhoneCallRecord {
   date: string;
   status: 'completed' | 'risk';
   summary: string;
+  rowNumber?: number; // Added for tracking Google Sheet row
   // Details for form population
   satisfaction: string;
   service_items?: string[];

@@ -178,3 +178,117 @@ export const updateAgencyResponse = async (
     return { success: false, message: '답변 저장 중 오류가 발생했습니다.' };
   }
 };
+
+// 행 업데이트 (덮어쓰기)
+export const updateSheetRow = async (
+  scriptUrl: string,
+  rowNumber: number,
+  data: FormDataState,
+  extraData?: { hypotheses?: Hypothesis[] }
+): Promise<{ success: boolean; message: string }> => {
+  if (!scriptUrl) return { success: false, message: 'API URL이 설정되지 않았습니다.' };
+
+  try {
+    const isPhoneMode = data.mon_method === '유선(매월)';
+
+    // Map Korean Mode to Apps Script English Codes
+    const modeMap: Record<string, string> = {
+      '온라인설문': 'online',
+      '유선(매월)': 'phone',
+      '1차 대면': 'visit',
+      '2차 대면': 'second-visit'
+    };
+    const mappedMode = modeMap[data.mon_method] || 'other';
+
+    // Construct Payload (Same as sendToGoogleSheet but with 'updateRow' action)
+    const payload = {
+      action: 'updateRow',
+      rowNumber: rowNumber,
+
+      // Meta Data
+      Timestamp: new Date().toLocaleString('ko-KR'),
+
+      // Basic Info
+      Survey_Date: data.survey_date,
+      Author: data.author,
+      Region: data.region,
+      Agency: data.agency,
+      Mode: mappedMode,
+      Service_Type: data.service_type,
+
+      // Target Info
+      Name: data.name,
+      Gender: data.gender,
+      Birth_Year: data.birth_year,
+      Birth_Month: data.birth_month,
+      Birth_Day: data.birth_day,
+      Age_Group: data.age_group,
+
+      // Phone Mode Data
+      Satisfaction: isPhoneMode ? data.satisfaction : '',
+      Service_Items: isPhoneMode ? data.service_items.join(', ') : '',
+      Visit_Freq: isPhoneMode ? data.visit_count : '',
+      Call_Freq: isPhoneMode ? data.call_count : '',
+
+      // Individual Phone Indicators
+      Gen_Stability: isPhoneMode ? (data.phone_indicators?.['gen_stability'] || '') : '',
+      Gen_Loneliness: isPhoneMode ? (data.phone_indicators?.['gen_loneliness'] || '') : '',
+      Gen_Safety: isPhoneMode ? (data.phone_indicators?.['gen_safety'] || '') : '',
+      Hosp_Indep: isPhoneMode ? (data.phone_indicators?.['hosp_indep'] || '') : '',
+      Hosp_Anxiety: isPhoneMode ? (data.phone_indicators?.['hosp_anxiety'] || '') : '',
+      Hosp_Sat: isPhoneMode ? (data.phone_indicators?.['hosp_sat'] || '') : '',
+      Spec_Emotion: isPhoneMode ? (data.phone_indicators?.['spec_emotion'] || '') : '',
+      Spec_Social: isPhoneMode ? (data.phone_indicators?.['spec_social'] || '') : '',
+      Spec_Sat: isPhoneMode ? (data.phone_indicators?.['spec_sat'] || '') : '',
+
+      Phone_Risk_Summary: isPhoneMode ? data.safety_trend : '',
+      Phone_Notes: isPhoneMode ? data.special_notes : '',
+      Phone_Indicators_Json: isPhoneMode ? JSON.stringify(data.phone_indicators) : '',
+
+      // Visit Mode Data
+      Env_Risks: data.env_check.join(', '),
+      Safety_Risks: data.safety_check.join(', '),
+      Body_Status: data.body_status,
+      Visit_Grade: data.final_grade,
+      Visit_Action_Memo: data.action_memo,
+      Visit_Indicators_Json: JSON.stringify({
+        indicators: data.visit_indicators,
+        hypotheses: extraData?.hypotheses || []
+      }),
+
+      // 2nd Visit Data
+      Visit2_Reason: data.visit2_reason,
+      Track_Stability: data.track_stability,
+      Track_Emotion: data.track_emotion,
+      Track_Social: data.track_social,
+      Track_Health: data.track_health,
+      Interview_Answers_Json: JSON.stringify(data.interview_answers),
+      Interviewer_Opinion: data.interviewer_opinion,
+
+      // Online Mode Data
+      Service_Duration: data.service_duration,
+      Satisfied_Areas: data.service_satisfaction_areas.join(', '),
+      Outdoor_Freq: data.outdoor_frequency,
+      Visited_Places: data.visited_places.join(', '),
+      Elder_Opinion: data.online_opinion,
+
+      // Risk Target Flag
+      Is_RiskTarget: data.is_risk_target ? '예' : '',
+    };
+
+    await fetch(scriptUrl, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(payload),
+    });
+
+    return { success: true, message: '기존 기록이 성공적으로 수정되었습니다.' };
+
+  } catch (error) {
+    console.error('Sheet Update Error:', error);
+    return { success: false, message: '데이터 수정 중 오류가 발생했습니다.' };
+  }
+};

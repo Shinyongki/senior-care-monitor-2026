@@ -5,7 +5,7 @@ import { PHONE_INDICATORS, VISIT_INDICATORS, INTERVIEW_QUESTIONS, ONLINE_EFFECTI
 import { Toast } from './components/ui/Toast';
 import { ReportModal } from './components/ui/ReportModal';
 import { SettingsModal } from './components/ui/SettingsModal';
-import { sendToGoogleSheet } from './utils/googleSheetApi';
+import { sendToGoogleSheet, fetchSheetData, updateSheetRow } from './utils/googleSheetApi';
 
 // Icons
 import {
@@ -522,6 +522,68 @@ ${formData.interviewer_opinion || '(작성되지 않음)'}`;
     showToast(`✏️ '${record.name}' 어르신의 기록을 수정합니다. 수정 후 저장 버튼을 눌러주세요.`, 'info');
   };
 
+  // Load Sheet Data
+  const handleLoadSheetData = async () => {
+    if (!formData.author) {
+      showToast('담당자를 먼저 선택해주세요.', 'error');
+      return;
+    }
+
+    if (!scriptUrl) {
+      showToast('구글 시트 연동 URL이 없습니다.', 'error');
+      return;
+    }
+
+    setIsSyncing(true);
+    showToast(`${formData.author}님의 기록을 불러오는 중...`, 'info');
+
+    try {
+      const response = await fetchSheetData(scriptUrl);
+
+      if (response.success && response.data) {
+        // Filter by Author and Mode 'phone'
+        const myRecords = response.data
+          .filter((row: any) =>
+            row.Author === formData.author &&
+            (row.Mode === 'phone' || row.Mode === '유선(매월)')
+          )
+          .map((row: any, index: number) => ({
+            id: Date.now() + index, // Temp ID for local key
+            rowNumber: row.rowNumber, // Important: Save row number for updates
+            name: row.Name,
+            gender: row.Gender,
+            birth_year: row.Birth_Year,
+            agency: row.Agency,
+            service_type: row.Service_Type,
+            date: row.Survey_Date,
+            status: row.Phone_Risk_Summary ? 'risk' as const : 'completed' as const,
+            summary: row.Phone_Risk_Summary || '특이사항 없음',
+            satisfaction: row.Satisfaction,
+            service_items: row.Service_Items ? row.Service_Items.split(', ') : [],
+            visit_count: row.Visit_Freq,
+            call_count: row.Call_Freq,
+            phone_indicators: row.Phone_Indicators_Json ? JSON.parse(row.Phone_Indicators_Json) : {},
+            safety_trend: row.Phone_Risk_Summary,
+            special_notes: row.Phone_Notes
+          }));
+
+        if (myRecords.length === 0) {
+          showToast('불러올 기록이 없습니다.', 'info');
+        } else {
+          setPhoneLog(myRecords); // Replace current list
+          showToast(`${myRecords.length}건의 기록을 불러왔습니다.`, 'success');
+        }
+      } else {
+        showToast(response.message || '데이터를 불러오는데 실패했습니다.', 'error');
+      }
+    } catch (error) {
+      console.error(error);
+      showToast('데이터를 불러오는데 실패했습니다.', 'error');
+    } finally {
+      setIsSyncing(false);
+    }
+  };
+
   // Modified Save Function: Local + Google Sheet
   const handleSave = async () => {
     if (formData.mon_method === '온라인설문') {
@@ -542,8 +604,20 @@ ${formData.interviewer_opinion || '(작성되지 않음)'}`;
 
     setIsSyncing(true);
 
-    // 1. Send to Google Sheet
-    const result = await sendToGoogleSheet(scriptUrl, formData, { hypotheses });
+    // 1. Send to Google Sheet (Insert or Update)
+    let result;
+
+    // Check if we are editing an existing row loaded from Sheet
+    const currentRecord = phoneLog.find(r => r.id === editingId);
+    const targetRowNumber = currentRecord?.rowNumber;
+
+    if (editingId && targetRowNumber) {
+      // Update existing row
+      result = await updateSheetRow(scriptUrl, targetRowNumber, formData, { hypotheses });
+    } else {
+      // Insert new row
+      result = await sendToGoogleSheet(scriptUrl, formData, { hypotheses });
+    }
 
     setIsSyncing(false);
 
@@ -554,6 +628,7 @@ ${formData.interviewer_opinion || '(작성되지 않음)'}`;
       if (formData.mon_method === '유선(매월)') {
         const newRecord: PhoneCallRecord = {
           id: editingId || Date.now(), // Use existing ID if editing
+          rowNumber: targetRowNumber, // Preserve rowNumber if updating
           name: formData.name,
           gender: formData.gender,
           birth_year: formData.birth_year,
@@ -714,6 +789,7 @@ ${formData.interviewer_opinion || '(작성되지 않음)'}`;
             updateField={updateField}
             themeText={getThemeText()}
             themeBorder={getThemeBorder()}
+            onLoadData={handleLoadSheetData}
           />
         )}
 

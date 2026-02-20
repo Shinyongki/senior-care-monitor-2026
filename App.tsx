@@ -546,16 +546,21 @@ ${formData.interviewer_opinion || '(작성되지 않음)'}`;
     }
 
     // Load record data into form
-    if (recordRegion) updateField('region', recordRegion);
     updateField('name', record.name);
     updateField('gender', record.gender);
     updateField('birth_year', record.birth_year);
-    // Use padStart directly here to assure string format is kept, though mapRowToRecord should have done this. 
-    // Wait, let's just use what's in the record.
-    updateField('birth_month', record.birth_month ? String(record.birth_month).padStart(2, '0') : '01');
-    updateField('birth_day', record.birth_day ? String(record.birth_day).padStart(2, '0') : '01');
-    // Ensure agency is set AFTER region to allow BasicInfo's useEffect to populate the list if we were relying on it, but the state update is batched.
-    setTimeout(() => updateField('agency', record.agency), 0);
+
+    // Ensure birth_month and birth_day are always exactly 2 digits if they exist
+    const paddedMonth = record.birth_month ? String(record.birth_month).padStart(2, '0') : '01';
+    const paddedDay = record.birth_day ? String(record.birth_day).padStart(2, '0') : '01';
+    updateField('birth_month', paddedMonth);
+    updateField('birth_day', paddedDay);
+
+    // Set Region and Agency directly
+    if (record.region || recordRegion) {
+      updateField('region', record.region || recordRegion);
+    }
+    updateField('agency', record.agency);
 
     updateField('service_type', record.service_type || '일반 서비스');
     updateField('satisfaction', record.satisfaction);

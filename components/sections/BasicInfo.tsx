@@ -23,16 +23,17 @@ const BasicInfo: React.FC<BasicInfoProps> = ({ formData, updateField, themeText,
       const newAgencies = REGION_AGENCY_MAP[formData.region];
       setAgencyList(newAgencies);
 
-      // Automatically select the first agency ONLY IF the current one is invalid for the new region,
-      // AND we aren't currently loading data that already has a valid agency set.
-      if (formData.agency && newAgencies.includes(formData.agency)) {
-        // do nothing, agency is valid for this region
-      } else if (newAgencies.length > 0) {
-        updateField('agency', newAgencies[0]);
+      // Automatically select the first agency ONLY IF the current one is invalid for the new region
+      if (!formData.agency || !newAgencies.includes(formData.agency)) {
+        if (newAgencies.length > 0) {
+          updateField('agency', newAgencies[0]);
+        }
       }
     } else {
       setAgencyList([]);
-      updateField('agency', '');
+      if (!formData.region && formData.agency) {
+        updateField('agency', '');
+      }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [formData.region]);

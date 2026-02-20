@@ -77,7 +77,8 @@ const VisitMode: React.FC<VisitModeProps> = ({
     const criticalFindings: string[] = [];
     const cautionFindings: string[] = [];
 
-    Object.values(indicators).forEach(val => {
+    Object.values(indicators).forEach(value => {
+      const val = String(value);
       // High Risk Keywords (Red / Crisis)
       if (val.match(/위기|위험|심각|단절|시급|긴급|발견|거부|고위험|직접적|극심|차단|부재|욕창|붕괴|은둔|적대적|공포|절망|포기/)) {
         highRiskCount++;

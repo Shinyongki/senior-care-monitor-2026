@@ -8,12 +8,14 @@ interface BasicInfoProps {
   updateField: (field: keyof FormDataState, value: any) => void;
   themeText: string;
   themeBorder: string;
-  onLoadData?: () => void;
-  onLoadAll?: () => void;
+  onLoadData?: (month?: string) => void;
+  onLoadAll?: (month?: string) => void;
 }
 
 const BasicInfo: React.FC<BasicInfoProps> = ({ formData, updateField, themeText, themeBorder, onLoadData, onLoadAll }) => {
   const [agencyList, setAgencyList] = useState<string[]>([]);
+  const currentMonthString = String(new Date().getMonth() + 1).padStart(2, '0');
+  const [selectedMonth, setSelectedMonth] = useState<string>(currentMonthString);
 
   // Agency Update Logic & Auto Select
   useEffect(() => {
@@ -87,24 +89,39 @@ const BasicInfo: React.FC<BasicInfoProps> = ({ formData, updateField, themeText,
         <span className="bg-slate-100 p-2 rounded-lg text-slate-600"><User size={20} /></span>
         <h3 className="text-lg font-bold text-slate-800">기본 정보</h3>
         {/* Load Data Buttons */}
-        {onLoadData && formData.author && (
-          <button
-            onClick={onLoadData}
-            className="ml-auto px-3 py-1.5 text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-lg shadow-sm transition-colors flex items-center gap-1"
-            title={`${formData.author} 담당자의 기록을 시트에서 불러옵니다.`}
-          >
-            📂 내 목록
-          </button>
-        )}
-        {onLoadAll && (
-          <button
-            onClick={onLoadAll}
-            className={`${onLoadData && formData.author ? '' : 'ml-auto'} px-3 py-1.5 text-xs font-bold text-slate-700 bg-slate-200 hover:bg-slate-300 rounded-lg shadow-sm transition-colors flex items-center gap-1`}
-            title="전체 기록을 시트에서 불러옵니다."
-          >
-            📋 전체 목록
-          </button>
-        )}
+        <div className="ml-auto flex items-center gap-2">
+          {(onLoadData || onLoadAll) && (
+            <select
+              title="불러올 월 선택"
+              value={selectedMonth}
+              onChange={(e) => setSelectedMonth(e.target.value)}
+              className="px-2 py-1.5 text-xs font-bold text-slate-600 bg-white border border-slate-200 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 outline-none"
+            >
+              <option value="">전체 기간</option>
+              {Array.from({ length: 12 }, (_, i) => String(i + 1).padStart(2, '0')).map(m => (
+                <option key={m} value={m}>{Number(m)}월 데이터</option>
+              ))}
+            </select>
+          )}
+          {onLoadData && formData.author && (
+            <button
+              onClick={() => onLoadData(selectedMonth === "" ? undefined : selectedMonth)}
+              className="px-3 py-1.5 text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-lg shadow-sm transition-colors flex items-center gap-1"
+              title={`${formData.author} 담당자의 ${selectedMonth ? selectedMonth + '월' : '전체'} 기록을 시트에서 불러옵니다.`}
+            >
+              📂 내 목록
+            </button>
+          )}
+          {onLoadAll && (
+            <button
+              onClick={() => onLoadAll(selectedMonth === "" ? undefined : selectedMonth)}
+              className="px-3 py-1.5 text-xs font-bold text-slate-700 bg-slate-200 hover:bg-slate-300 rounded-lg shadow-sm transition-colors flex items-center gap-1"
+              title={`전체 ${selectedMonth ? selectedMonth + '월' : '전체'} 기록을 시트에서 불러옵니다.`}
+            >
+              📋 전체 목록
+            </button>
+          )}
+        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-6">

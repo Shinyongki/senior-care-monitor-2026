@@ -534,6 +534,26 @@ ${formData.interviewer_opinion || '(작성되지 않음)'}`;
   const padTwo = (v: any) => String(v || '01').padStart(2, '0');
   const mapRowToRecord = (row: any, index: number): PhoneCallRecord => {
     // console.log('Mapping Row:', row.rowNumber, row.Name); 
+
+    // Reconstruct phone_indicators from individual columns
+    const phone_indicators = {
+      ...(row.Gen_Stability ? { gen_stability: row.Gen_Stability } : {}),
+      ...(row.Gen_Loneliness ? { gen_loneliness: row.Gen_Loneliness } : {}),
+      ...(row.Gen_Safety ? { gen_safety: row.Gen_Safety } : {}),
+      ...(row.Hosp_Indep ? { hosp_indep: row.Hosp_Indep } : {}),
+      ...(row.Hosp_Anxiety ? { hosp_anxiety: row.Hosp_Anxiety } : {}),
+      ...(row.Hosp_Sat ? { hosp_sat: row.Hosp_Sat } : {}),
+      ...(row.Spec_Emotion ? { spec_emotion: row.Spec_Emotion } : {}),
+      ...(row.Spec_Social ? { spec_social: row.Spec_Social } : {}),
+      ...(row.Spec_Sat ? { spec_sat: row.Spec_Sat } : {}),
+    };
+
+    // Determine Risk Status based on actual indicators, not just presence of summary text
+    const hasRiskIndicator = Object.values(phone_indicators).some((val: any) =>
+      typeof val === 'string' && (val.includes('불안') || val.includes('고립') || val.includes('어려움') || val.includes('불만족') || val.includes('발견') || val.includes('위험'))
+    );
+    const isRisk = row.Is_RiskTarget === '예' || hasRiskIndicator;
+
     return {
       id: Date.now() + index,
       rowNumber: Number(row.rowNumber), // Ensure number type
@@ -545,52 +565,44 @@ ${formData.interviewer_opinion || '(작성되지 않음)'}`;
       agency: row.Agency,
       service_type: row.Service_Type,
       date: row.Survey_Date,
-      status: row.Phone_Risk_Summary ? 'risk' as const : 'completed' as const,
+      status: isRisk ? 'risk' as const : 'completed' as const,
       summary: row.Phone_Risk_Summary || '특이사항 없음',
       satisfaction: row.Satisfaction,
       service_items: row.Service_Items ? row.Service_Items.split(', ') : [],
       visit_count: row.Visit_Freq,
       call_count: row.Call_Freq,
-      // Reconstruct phone_indicators from individual columns
-      phone_indicators: {
-        ...(row.Gen_Stability ? { gen_stability: row.Gen_Stability } : {}),
-        ...(row.Gen_Loneliness ? { gen_loneliness: row.Gen_Loneliness } : {}),
-        ...(row.Gen_Safety ? { gen_safety: row.Gen_Safety } : {}),
-        ...(row.Hosp_Indep ? { hosp_indep: row.Hosp_Indep } : {}),
-        ...(row.Hosp_Anxiety ? { hosp_anxiety: row.Hosp_Anxiety } : {}),
-        ...(row.Hosp_Sat ? { hosp_sat: row.Hosp_Sat } : {}),
-        ...(row.Spec_Emotion ? { spec_emotion: row.Spec_Emotion } : {}),
-        ...(row.Spec_Social ? { spec_social: row.Spec_Social } : {}),
-        ...(row.Spec_Sat ? { spec_sat: row.Spec_Sat } : {}),
-      },
+      phone_indicators: phone_indicators,
       safety_trend: row.Phone_Risk_Summary,
       special_notes: row.Phone_Notes
     };
   };
 
   // Load Sheet Data (filtered by author)
-  const handleLoadSheetData = async () => {
+  const handleLoadSheetData = async (month?: string) => {
     if (!formData.author) {
       showToast('담당자를 먼저 선택해주세요.', 'error');
       return;
     }
-    await loadSheetRecords(formData.author);
+    await loadSheetRecords(formData.author, month);
   };
 
   // Load All Sheet Data (no filter)
-  const handleLoadAllData = async () => {
-    await loadSheetRecords(null);
+  const handleLoadAllData = async (month?: string) => {
+    await loadSheetRecords(null, month);
   };
 
   // Core loader
-  const loadSheetRecords = async (authorFilter: string | null) => {
+  const loadSheetRecords = async (authorFilter: string | null, monthFilter?: string) => {
     if (!scriptUrl) {
       showToast('구글 시트 연동 URL이 없습니다.', 'error');
       return;
     }
 
     setIsSyncing(true);
-    showToast(authorFilter ? `${authorFilter}님의 기록을 불러오는 중...` : '전체 기록을 불러오는 중...', 'info');
+    let toastMsg = authorFilter ? `${authorFilter}님의 ` : '전체 ';
+    if (monthFilter) toastMsg += `${monthFilter}월 `;
+    toastMsg += '기록을 불러오는 중...';
+    showToast(toastMsg, 'info');
 
     try {
       const response = await fetchSheetData(scriptUrl);
@@ -600,6 +612,27 @@ ${formData.interviewer_opinion || '(작성되지 않음)'}`;
           .filter((row: any) => {
             const isPhone = row.Mode === 'phone' || row.Mode === '유선(매월)';
             if (!isPhone) return false;
+
+            // Apply month filter
+            if (monthFilter && row.Survey_Date) {
+              const dateParts = String(row.Survey_Date).split('-');
+              if (dateParts.length >= 2) {
+                const rowMonth = parseInt(dateParts[1], 10);
+                if (rowMonth !== parseInt(monthFilter, 10)) {
+                  return false;
+                }
+              } else if (String(row.Survey_Date).includes('.')) {
+                // Fallback for "2026. 2. 20." format
+                const dotParts = String(row.Survey_Date).split('.');
+                if (dotParts.length >= 2) {
+                  const rowMonth = parseInt(dotParts[1].trim(), 10);
+                  if (rowMonth !== parseInt(monthFilter, 10)) {
+                    return false;
+                  }
+                }
+              }
+            }
+
             if (authorFilter) return row.Author === authorFilter;
             return true;
           })

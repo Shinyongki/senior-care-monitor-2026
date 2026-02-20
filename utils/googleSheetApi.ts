@@ -127,12 +127,38 @@ export interface SheetRow {
   [key: string]: string | number | undefined;
 }
 
+// 시트 데이터 삭제 (GET 요청 우회)
+export const deleteRowFromSheet = async (scriptUrl: string, rowNumber: number, author: string): Promise<{ success: boolean; message?: string }> => {
+  if (!scriptUrl) return { success: false, message: 'API URL이 설정되지 않았습니다.' };
+
+  try {
+    const url = new URL(scriptUrl);
+    url.searchParams.append('action', 'delete');
+    url.searchParams.append('rowNumber', String(rowNumber));
+    url.searchParams.append('author', author);
+
+    const response = await fetch(url.toString(), {
+      method: 'GET',
+    });
+
+    if (response.type === 'opaque') {
+      // no-cors returns opaque, but our script is returning JSON with CORS headers usually so it shouldn't hit this if deployed as Web App returning ContentService properly, but let's be safe.
+      return { success: true, message: '삭제 요청이 전송되었습니다.' };
+    }
+
+    const result = await response.json();
+    return result;
+  } catch (error) {
+    console.error('Delete Sheet Data Error:', error);
+    return { success: false, message: '데이터 삭제 중 오류가 발생했습니다.' };
+  }
+};
+
 export const fetchSheetData = async (scriptUrl: string): Promise<{ success: boolean; data?: SheetRow[]; message?: string }> => {
   if (!scriptUrl) return { success: false, message: 'API URL이 설정되지 않았습니다.' };
 
   try {
     // Removed incorrect POST request that was triggering doPost save logic
-
 
     // no-cors mode returns opaque response, so we cannot read the body directly.
     // Instead, use a redirect-based approach with GET + query parameter

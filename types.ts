@@ -31,6 +31,7 @@ export interface PhoneCallRecord {
   birth_year: string;
   birth_month?: string;
   birth_day?: string;
+  region?: string;
   agency: string;
   service_type?: ServiceType;
   date: string;

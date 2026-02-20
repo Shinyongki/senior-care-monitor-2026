@@ -5,7 +5,7 @@ import { PHONE_INDICATORS, VISIT_INDICATORS, INTERVIEW_QUESTIONS, ONLINE_EFFECTI
 import { Toast } from './components/ui/Toast';
 import { ReportModal } from './components/ui/ReportModal';
 import { SettingsModal } from './components/ui/SettingsModal';
-import { sendToGoogleSheet, fetchSheetData, updateSheetRow } from './utils/googleSheetApi';
+import { sendToGoogleSheet, fetchSheetData, updateSheetRow, deleteRowFromSheet } from './utils/googleSheetApi';
 
 // Icons
 import {
@@ -495,17 +495,42 @@ ${formData.interviewer_opinion || '(작성되지 않음)'}`;
   // New: Editing State
   const [editingId, setEditingId] = useState<number | null>(null);
 
-  const handleDeleteLog = (id: number) => {
+  const handleDeleteLog = async (id: number) => {
     console.log('Delete requested for ID:', id);
-    // Removed confirm dialog to rule out environment blocking issues
-    // if (confirm('정말로 이 기록을 삭제하시겠습니까? (로컬 목록에서만 삭제됩니다)')) {
-    setPhoneLog(prev => {
-      const newLog = prev.filter(log => log.id !== id);
-      console.log('Previous length:', prev.length, 'New length:', newLog.length);
-      return newLog;
-    });
-    showToast('🗑️ 기록이 삭제되었습니다.', 'info');
-    // }
+
+    const recordToDelete = phoneLog.find(log => log.id === id);
+    if (!recordToDelete) return;
+
+    if (!scriptUrl) {
+      showToast('⚠️ 구글 시트 연동 URL이 없습니다.', 'error');
+      return;
+    }
+
+    if (!recordToDelete.rowNumber) {
+      showToast('⚠️ 시트 행 번호를 찾을 수 없어 로컬에서만 삭제됩니다.', 'info');
+      setPhoneLog(prev => prev.filter(log => log.id !== id));
+      return;
+    }
+
+    if (confirm(`'${recordToDelete.name}' 어르신의 기록을 정말 삭제하시겠습니까? (구글 시트에서도 완전히 삭제됩니다)`)) {
+      setIsSyncing(true);
+      showToast('🗑️ 기록을 구글 시트에서 삭제하는 중...', 'info');
+
+      try {
+        const response = await deleteRowFromSheet(scriptUrl, recordToDelete.rowNumber, formData.author);
+        if (response.success) {
+          setPhoneLog(prev => prev.filter(log => log.id !== id));
+          showToast('🗑️ 기록이 성공적으로 삭제되었습니다.', 'success');
+          // Reload sheet to ensure indexes are correct if needed, but for now just local removal is fine.
+        } else {
+          showToast(response.message || '데이터 삭제에 실패했습니다.', 'error');
+        }
+      } catch (error) {
+        showToast('데이터 삭제 중 오류가 발생했습니다.', 'error');
+      } finally {
+        setIsSyncing(false);
+      }
+    }
   };
 
   const handleEditLog = (record: PhoneCallRecord) => {
@@ -562,11 +587,15 @@ ${formData.interviewer_opinion || '(작성되지 않음)'}`;
       ...(row.Spec_Sat ? { spec_sat: row.Spec_Sat } : {}),
     };
 
-    // Determine Risk Status based on actual indicators, not just presence of summary text
+    // Determine Risk Status based on indicators and text keywords
     const hasRiskIndicator = Object.values(phone_indicators).some((val: any) =>
-      typeof val === 'string' && (val.includes('불안') || val.includes('고립') || val.includes('어려움') || val.includes('불만족') || val.includes('발견') || val.includes('위험'))
+      typeof val === 'string' && (val.includes('불안') || val.includes('고립') || val.includes('어려움') || val.includes('불만족') || val.includes('위험'))
     );
-    const isRisk = row.Is_RiskTarget === '예' || hasRiskIndicator;
+    const riskKeywords = ['새고', '엉망', '교체', '위험', '응급', '병원', '입원', '낙상', '사고'];
+    const summaryText = (row.Phone_Risk_Summary || '') + ' ' + (row.Phone_Notes || '');
+    const hasTextRisk = riskKeywords.some(keyword => summaryText.includes(keyword));
+
+    const isRisk = row.Is_RiskTarget === '예' || hasRiskIndicator || hasTextRisk;
 
     return {
       id: Date.now() + index,
@@ -576,6 +605,7 @@ ${formData.interviewer_opinion || '(작성되지 않음)'}`;
       birth_year: row.Birth_Year,
       birth_month: padTwo(row.Birth_Month),
       birth_day: padTwo(row.Birth_Day),
+      region: row.Region,
       agency: row.Agency,
       service_type: row.Service_Type,
       date: row.Survey_Date,

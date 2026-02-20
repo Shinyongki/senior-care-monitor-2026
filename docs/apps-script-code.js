@@ -424,6 +424,52 @@ function addHeaders(sheet, mode, serviceType) {
 function doGet(e) {
     var action = (e && e.parameter && e.parameter.action) ? e.parameter.action : '';
 
+    if (action === 'delete') {
+        try {
+            var row = Number(e.parameter.rowNumber);
+            var author = e.parameter.author;
+
+            if (!row || row < 2) {
+                return ContentService
+                    .createTextOutput(JSON.stringify({ success: false, error: '유효하지 않은 행 번호입니다.' }))
+                    .setMimeType(ContentService.MimeType.JSON);
+            }
+
+            var spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
+            var mainSheet = spreadsheet.getSheetByName('유선(매월)');
+
+            if (mainSheet) {
+                // To delete from author sheet, we should get the Name or Timestamp first since row number changes
+                var originalData = mainSheet.getRange(row, 1, 1, mainSheet.getLastColumn()).getValues()[0];
+                var originalTimestamp = originalData[0];
+                var originalName = originalData[7]; // Name is typically column H (index 7)
+
+                mainSheet.deleteRow(row);
+
+                if (author) {
+                    var authorSheet = spreadsheet.getSheetByName(author);
+                    if (authorSheet) {
+                        var targetRow = -1;
+                        if (originalTimestamp) targetRow = findRowByTimestamp(authorSheet, originalTimestamp);
+                        if (targetRow === -1 && originalName) targetRow = findRowByName(authorSheet, originalName);
+
+                        if (targetRow > 1) {
+                            authorSheet.deleteRow(targetRow);
+                        }
+                    }
+                }
+            }
+
+            return ContentService
+                .createTextOutput(JSON.stringify({ success: true, message: '기록이 성공적으로 삭제되었습니다.' }))
+                .setMimeType(ContentService.MimeType.JSON);
+        } catch (error) {
+            return ContentService
+                .createTextOutput(JSON.stringify({ success: false, error: error.toString() }))
+                .setMimeType(ContentService.MimeType.JSON);
+        }
+    }
+
     if (action === 'getData') {
         try {
             var spreadsheet = SpreadsheetApp.getActiveSpreadsheet();

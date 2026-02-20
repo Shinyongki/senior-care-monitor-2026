@@ -511,13 +511,27 @@ ${formData.interviewer_opinion || '(작성되지 않음)'}`;
   const handleEditLog = (record: PhoneCallRecord) => {
     setEditingId(record.id);
 
+    // Deduce region from agency to prevent BasicInfo from resetting it
+    let recordRegion = '';
+    for (const [region, agencies] of Object.entries(REGION_AGENCY_MAP)) {
+      if (agencies.includes(record.agency)) {
+        recordRegion = region;
+        break;
+      }
+    }
+
     // Load record data into form
+    if (recordRegion) updateField('region', recordRegion);
     updateField('name', record.name);
     updateField('gender', record.gender);
     updateField('birth_year', record.birth_year);
-    updateField('birth_month', record.birth_month || '01');
-    updateField('birth_day', record.birth_day || '01');
-    updateField('agency', record.agency);
+    // Use padStart directly here to assure string format is kept, though mapRowToRecord should have done this. 
+    // Wait, let's just use what's in the record.
+    updateField('birth_month', record.birth_month ? String(record.birth_month).padStart(2, '0') : '01');
+    updateField('birth_day', record.birth_day ? String(record.birth_day).padStart(2, '0') : '01');
+    // Ensure agency is set AFTER region to allow BasicInfo's useEffect to populate the list if we were relying on it, but the state update is batched.
+    setTimeout(() => updateField('agency', record.agency), 0);
+
     updateField('service_type', record.service_type || '일반 서비스');
     updateField('satisfaction', record.satisfaction);
     updateField('service_items', record.service_items || []);

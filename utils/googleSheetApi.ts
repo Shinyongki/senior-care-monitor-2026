@@ -131,15 +131,8 @@ export const fetchSheetData = async (scriptUrl: string): Promise<{ success: bool
   if (!scriptUrl) return { success: false, message: 'API URL이 설정되지 않았습니다.' };
 
   try {
-    // Use POST with action: 'getData' since doGet only returns a health check message
-    const response = await fetch(scriptUrl, {
-      method: 'POST',
-      mode: 'no-cors',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ action: 'getData' }),
-    });
+    // Removed incorrect POST request that was triggering doPost save logic
+
 
     // no-cors mode returns opaque response, so we cannot read the body directly.
     // Instead, use a redirect-based approach with GET + query parameter

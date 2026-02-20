@@ -37,7 +37,7 @@ const App: React.FC = () => {
 
   // Persisted Data
   // 하드코딩된 기본 Google Apps Script URL (항상 동일한 시트 사용)
-  const DEFAULT_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxxteIi_SPSP4PdZc5JbzrpfWWBz7KFDm9CIbaINOrMy6MqeytbhGfRicix-_2epPL7Cw/exec';
+  const DEFAULT_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwf503H0y9XRbHyjN230Vs1uf6-zx3xkQ_ezL08jDo4gszdYY3VEybXuUW7jJI1vA4ctg/exec';
   const [scriptUrl, setScriptUrl] = useState<string>(() => localStorage.getItem('googleSheetUrl') || DEFAULT_SCRIPT_URL);
 
   const [hypotheses, setHypotheses] = useState<Hypothesis[]>(() => {
@@ -532,38 +532,41 @@ ${formData.interviewer_opinion || '(작성되지 않음)'}`;
 
   // Shared: Map sheet row to PhoneCallRecord
   const padTwo = (v: any) => String(v || '01').padStart(2, '0');
-  const mapRowToRecord = (row: any, index: number): PhoneCallRecord => ({
-    id: Date.now() + index,
-    rowNumber: row.rowNumber,
-    name: row.Name,
-    gender: row.Gender,
-    birth_year: row.Birth_Year,
-    birth_month: padTwo(row.Birth_Month),
-    birth_day: padTwo(row.Birth_Day),
-    agency: row.Agency,
-    service_type: row.Service_Type,
-    date: row.Survey_Date,
-    status: row.Phone_Risk_Summary ? 'risk' as const : 'completed' as const,
-    summary: row.Phone_Risk_Summary || '특이사항 없음',
-    satisfaction: row.Satisfaction,
-    service_items: row.Service_Items ? row.Service_Items.split(', ') : [],
-    visit_count: row.Visit_Freq,
-    call_count: row.Call_Freq,
-    // Reconstruct phone_indicators from individual columns
-    phone_indicators: {
-      ...(row.Gen_Stability ? { gen_stability: row.Gen_Stability } : {}),
-      ...(row.Gen_Loneliness ? { gen_loneliness: row.Gen_Loneliness } : {}),
-      ...(row.Gen_Safety ? { gen_safety: row.Gen_Safety } : {}),
-      ...(row.Hosp_Indep ? { hosp_indep: row.Hosp_Indep } : {}),
-      ...(row.Hosp_Anxiety ? { hosp_anxiety: row.Hosp_Anxiety } : {}),
-      ...(row.Hosp_Sat ? { hosp_sat: row.Hosp_Sat } : {}),
-      ...(row.Spec_Emotion ? { spec_emotion: row.Spec_Emotion } : {}),
-      ...(row.Spec_Social ? { spec_social: row.Spec_Social } : {}),
-      ...(row.Spec_Sat ? { spec_sat: row.Spec_Sat } : {}),
-    },
-    safety_trend: row.Phone_Risk_Summary,
-    special_notes: row.Phone_Notes
-  });
+  const mapRowToRecord = (row: any, index: number): PhoneCallRecord => {
+    // console.log('Mapping Row:', row.rowNumber, row.Name); 
+    return {
+      id: Date.now() + index,
+      rowNumber: Number(row.rowNumber), // Ensure number type
+      name: row.Name,
+      gender: row.Gender,
+      birth_year: row.Birth_Year,
+      birth_month: padTwo(row.Birth_Month),
+      birth_day: padTwo(row.Birth_Day),
+      agency: row.Agency,
+      service_type: row.Service_Type,
+      date: row.Survey_Date,
+      status: row.Phone_Risk_Summary ? 'risk' as const : 'completed' as const,
+      summary: row.Phone_Risk_Summary || '특이사항 없음',
+      satisfaction: row.Satisfaction,
+      service_items: row.Service_Items ? row.Service_Items.split(', ') : [],
+      visit_count: row.Visit_Freq,
+      call_count: row.Call_Freq,
+      // Reconstruct phone_indicators from individual columns
+      phone_indicators: {
+        ...(row.Gen_Stability ? { gen_stability: row.Gen_Stability } : {}),
+        ...(row.Gen_Loneliness ? { gen_loneliness: row.Gen_Loneliness } : {}),
+        ...(row.Gen_Safety ? { gen_safety: row.Gen_Safety } : {}),
+        ...(row.Hosp_Indep ? { hosp_indep: row.Hosp_Indep } : {}),
+        ...(row.Hosp_Anxiety ? { hosp_anxiety: row.Hosp_Anxiety } : {}),
+        ...(row.Hosp_Sat ? { hosp_sat: row.Hosp_Sat } : {}),
+        ...(row.Spec_Emotion ? { spec_emotion: row.Spec_Emotion } : {}),
+        ...(row.Spec_Social ? { spec_social: row.Spec_Social } : {}),
+        ...(row.Spec_Sat ? { spec_sat: row.Spec_Sat } : {}),
+      },
+      safety_trend: row.Phone_Risk_Summary,
+      special_notes: row.Phone_Notes
+    };
+  };
 
   // Load Sheet Data (filtered by author)
   const handleLoadSheetData = async () => {
@@ -645,6 +648,13 @@ ${formData.interviewer_opinion || '(작성되지 않음)'}`;
     // Check if we are editing an existing row loaded from Sheet
     const currentRecord = phoneLog.find(r => r.id === editingId);
     const targetRowNumber = currentRecord?.rowNumber;
+
+    console.log('Save Debug:', {
+      editingId,
+      currentRecord,
+      targetRowNumber: targetRowNumber || 'undefined',
+      formDataName: formData.name
+    });
 
     if (editingId && targetRowNumber) {
       // Update existing row

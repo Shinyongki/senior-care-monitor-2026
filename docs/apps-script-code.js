@@ -36,6 +36,57 @@ function doPost(e) {
     }
 }
 
+// ==========================================
+// [NEW] onEdit Trigger for Manual Edit Sync
+// ==========================================
+function onEdit(e) {
+    if (!e) return; // e 객체가 없는 경우 방어
+
+    var range = e.range;
+    var sheet = range.getSheet();
+    var sheetName = sheet.getName();
+
+    // 1. '유선(매월)' 시트가 수정되었을 때만 동작
+    if (sheetName !== '유선(매월)') return;
+
+    // 2. 헤더 행(1행) 제외
+    var row = range.getRow();
+    if (row < 2) return;
+
+    // 3. 전체 데이터 가져오기 (행 전체)
+    var numCols = sheet.getLastColumn();
+    var rowData = sheet.getRange(row, 1, 1, numCols).getValues()[0];
+
+    // 4. 필수 정보 추출 (Timestamp: Col1, Author: Col3, Name: Col8)
+    // 인덱스: 0=Timestamp, 2=Author, 7=Name
+    var timestamp = rowData[0];
+    var author = rowData[2];
+    var name = rowData[7];
+
+    if (!author || !name) return; // 담당자나 대상자명이 없으면 동기화 불가
+
+    // 5. 담당자 시트 찾기
+    var spreadsheet = e.source;
+    var authorSheet = spreadsheet.getSheetByName(author);
+    if (!authorSheet) return; // 해당 담당자 시트가 없으면 패스
+
+    // 6. 담당자 시트에서 해당 기록 찾기 (Timestamp 기준)
+    // Timestamp가 없으면 Name으로 Fallback
+    var targetRow = -1;
+    if (timestamp) {
+        targetRow = findRowByTimestamp(authorSheet, timestamp);
+    }
+    if (targetRow === -1) {
+        targetRow = findRowByName(authorSheet, name);
+    }
+
+    // 7. 동기화 실행
+    if (targetRow > 0) {
+        // 기존 행 업데이트
+        authorSheet.getRange(targetRow, 1, 1, numCols).setValues([rowData]);
+    }
+}
+
 // 수행기관 답변 업데이트 핸들러
 function handleUpdateResponse(spreadsheet, data) {
     var mainSheet = spreadsheet.getSheetByName('유선(매월)');
@@ -52,11 +103,17 @@ function handleUpdateResponse(spreadsheet, data) {
     var author = mainSheet.getRange(row, 3).getValue();
     var targetName = mainSheet.getRange(row, 8).getValue();
 
+    // Timestamp 가져오기 (1열)
+    var timestamp = mainSheet.getRange(row, 1).getValue();
+
     if (author && targetName) {
         var authorSheet = spreadsheet.getSheetByName(author);
         if (authorSheet) {
-            // 담당자 시트에서 대상자명으로 행 찾기 (가장 최근 데이터 기준)
-            var targetRow = findRowByName(authorSheet, targetName);
+            // Timestamp로 우선 검색, 없으면 이름으로 검색
+            var targetRow = -1;
+            if (timestamp) targetRow = findRowByTimestamp(authorSheet, timestamp);
+            if (targetRow === -1) targetRow = findRowByName(authorSheet, targetName);
+
             if (targetRow > 0) {
                 updateColumn(authorSheet, targetRow, '수행기관답변', response);
             }
@@ -77,11 +134,30 @@ function updateColumn(sheet, row, headerName, value) {
     }
 }
 
+// 이름으로 행 찾기 (Fallback)
 function findRowByName(sheet, name) {
     var data = sheet.getDataRange().getValues();
     // 역순으로 탐색 (가장 최근 데이터 우선)
     for (var i = data.length - 1; i >= 1; i--) {
         if (data[i][7] == name) { // 8번째 열(Index 7)이 대상자명
+            return i + 1;
+        }
+    }
+    return -1;
+}
+
+// Timestamp로 행 찾기 (Robust Sync)
+function findRowByTimestamp(sheet, timestamp) {
+    var data = sheet.getDataRange().getValues();
+    // Timestamp는 1열 (Index 0)
+    // 날짜 객체 비교를 위해 문자열 변환 또는 getTime() 사용
+    var searchTime = new Date(timestamp).getTime();
+    if (isNaN(searchTime)) return -1;
+
+    for (var i = data.length - 1; i >= 1; i--) {
+        var rowTime = new Date(data[i][0]).getTime();
+        // 1초 이내 오차 허용 (Google Sheets 포맷 차이 고려)
+        if (!isNaN(rowTime) && Math.abs(rowTime - searchTime) < 2000) {
             return i + 1;
         }
     }
@@ -102,16 +178,34 @@ function handleUpdateRow(spreadsheet, data) {
     var mainSheet = spreadsheet.getSheetByName('유선(매월)');
     if (!mainSheet) return ErrorResponse('유선(매월) 시트를 찾을 수 없습니다.');
 
-    // 기존 행 데이터를 새 데이터로 덮어쓰기
+    // 1. 기존 데이터 읽기 (수정 전의 담당자/Timestamp 확인용)
+    var originalData = mainSheet.getRange(row, 1, 1, mainSheet.getLastColumn()).getValues()[0];
+    var originalTimestamp = originalData[0]; // 저장시각
+
+    // 2. 메인 시트 데이터 덮어쓰기
     var rowData = buildRowData(data, data.Mode || 'phone');
+    // Timestamp 보존 (새로운 수정 시각으로 덮어쓰지 않고, 원본 생성 시각 유지 권장 or Update 시각 반영?)
+    // data.Timestamp가 새로 생성되어서 오므로 그대로 사용
     var range = mainSheet.getRange(row, 1, 1, rowData.length);
     range.setValues([rowData]);
 
-    // 담당자 시트도 동기화
+    // 3. 담당자 시트 동기화
     if (data.Author) {
         var authorSheet = spreadsheet.getSheetByName(data.Author);
         if (authorSheet) {
-            var targetRow = findRowByName(authorSheet, data.Name);
+            // Timestamp로 매칭 시도
+            var targetRow = -1;
+
+            // A. 원본 Timestamp로 찾기 (가장 정확)
+            if (originalTimestamp) {
+                targetRow = findRowByTimestamp(authorSheet, originalTimestamp);
+            }
+
+            // B. 없으면 이름으로 찾기
+            if (targetRow === -1) {
+                targetRow = findRowByName(authorSheet, data.Name);
+            }
+
             if (targetRow > 0) {
                 var authorRange = authorSheet.getRange(targetRow, 1, 1, rowData.length);
                 authorRange.setValues([rowData]);

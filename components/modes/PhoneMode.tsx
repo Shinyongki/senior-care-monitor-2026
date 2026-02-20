@@ -2,7 +2,7 @@
 import React from 'react';
 import { Card } from '../ui/Card';
 import { FormDataState, ServiceType, RiskTarget, PhoneCallRecord } from '../../types';
-import { PHONE_INDICATORS } from '../../constants';
+import { PHONE_INDICATORS, REGION_AGENCY_MAP } from '../../constants';
 import { Zap, AlertTriangle, ArrowRight, CheckCircle2, PhoneIncoming, AlertCircle, Trash2, Edit2 } from 'lucide-react';
 
 interface PhoneModeProps {
@@ -37,13 +37,37 @@ const PhoneMode: React.FC<PhoneModeProps> = ({
   };
 
   const loadRecord = (record: PhoneCallRecord) => {
-    updateField('name', record.name);
+    // 1. Set author & survey_date FIRST (region dropdown depends on author)
+    if (record.author) updateField('author', record.author);
+    if (record.date) updateField('survey_date', record.date);
+
+    // 2. Set region BEFORE agency so BasicInfo's agencyList updates correctly
+    if (record.region) {
+      updateField('region', record.region);
+    } else {
+      // Deduce region from agency using REGION_AGENCY_MAP
+      for (const [region, agencies] of Object.entries(REGION_AGENCY_MAP)) {
+        if (agencies.includes(record.agency)) {
+          updateField('region', region);
+          break;
+        }
+      }
+    }
     updateField('agency', record.agency);
+
+    // 3. Set personal info
+    updateField('name', record.name);
     updateField('gender', record.gender);
     updateField('birth_year', record.birth_year);
 
+    const paddedMonth = record.birth_month ? String(record.birth_month).padStart(2, '0') : '01';
+    const paddedDay = record.birth_day ? String(record.birth_day).padStart(2, '0') : '01';
+    updateField('birth_month', paddedMonth);
+    updateField('birth_day', paddedDay);
+
     if (record.service_type) updateField('service_type', record.service_type);
 
+    // 4. Set phone mode specific fields
     updateField('satisfaction', record.satisfaction || '만족');
     updateField('service_items', record.service_items || []);
     updateField('visit_count', record.visit_count || '주 1회');

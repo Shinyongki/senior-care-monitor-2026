@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo, useRef } from 'react';
 import { FormDataState } from '../../types';
 import { REGION_AGENCY_MAP, AUTHORS, AUTHOR_REGION_MAP } from '../../constants';
 import { User, Calendar, MapPin, Briefcase } from 'lucide-react';
@@ -13,26 +13,26 @@ interface BasicInfoProps {
 }
 
 const BasicInfo: React.FC<BasicInfoProps> = ({ formData, updateField, themeText, themeBorder, onLoadData, onLoadAll }) => {
-  const [agencyList, setAgencyList] = useState<string[]>([]);
   const currentMonthString = String(new Date().getMonth() + 1).padStart(2, '0');
   const [selectedMonth, setSelectedMonth] = useState<string>(currentMonthString);
 
-  // Agency Update Logic & Auto Select
-  useEffect(() => {
-    if (formData.region && REGION_AGENCY_MAP[formData.region]) {
-      const newAgencies = REGION_AGENCY_MAP[formData.region];
-      setAgencyList(newAgencies);
+  // Track whether region was changed by user interaction (not by loadRecord)
+  const userChangedRegion = useRef(false);
 
-      // Automatically select the first agency ONLY IF the current one is invalid for the new region
-      if (!formData.agency || !newAgencies.includes(formData.agency)) {
-        if (newAgencies.length > 0) {
-          updateField('agency', newAgencies[0]);
-        }
-      }
-    } else {
-      setAgencyList([]);
-      if (!formData.region && formData.agency) {
-        updateField('agency', '');
+  // Agency list is always derived from region - no useState, no timing issues
+  const agencyList = useMemo(() => {
+    if (formData.region && REGION_AGENCY_MAP[formData.region]) {
+      return REGION_AGENCY_MAP[formData.region];
+    }
+    return [];
+  }, [formData.region]);
+
+  // Auto-select first agency ONLY when user manually changes region
+  useEffect(() => {
+    if (userChangedRegion.current) {
+      userChangedRegion.current = false;
+      if (agencyList.length > 0 && !agencyList.includes(formData.agency)) {
+        updateField('agency', agencyList[0]);
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -46,9 +46,15 @@ const BasicInfo: React.FC<BasicInfoProps> = ({ formData, updateField, themeText,
     // Auto-link logic: 담당자가 담당하는 첫 번째 지역을 기본값으로 설정
     const authorRegions = AUTHOR_REGION_MAP[selectedAuthor];
     if (authorRegions && authorRegions.length > 0) {
+      userChangedRegion.current = true;
       updateField('region', authorRegions[0]);
-      // Note: The useEffect above will handle setting the default agency for this region
     }
+  };
+
+  // Handle Region Change by user
+  const handleRegionChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    userChangedRegion.current = true;
+    updateField('region', e.target.value);
   };
 
   // Auto-calculate Age Group based on Decade/Year
@@ -157,7 +163,7 @@ const BasicInfo: React.FC<BasicInfoProps> = ({ formData, updateField, themeText,
           <div className="flex gap-2">
             <select
               value={formData.region}
-              onChange={(e) => updateField('region', e.target.value)}
+              onChange={handleRegionChange}
               className="w-1/3 p-2.5 text-sm bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none input-transition"
             >
               <option value="">지역</option>

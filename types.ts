@@ -26,6 +26,7 @@ export interface RiskTarget {
 
 export interface PhoneCallRecord {
   id: number;
+  author?: string;
   name: string;
   gender: string;
   birth_year: string;

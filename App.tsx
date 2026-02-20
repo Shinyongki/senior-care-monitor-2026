@@ -545,22 +545,25 @@ ${formData.interviewer_opinion || '(작성되지 않음)'}`;
       }
     }
 
-    // Load record data into form
-    updateField('name', record.name);
-    updateField('gender', record.gender);
-    updateField('birth_year', record.birth_year);
+    // 1. Set author & survey_date FIRST (region dropdown depends on author)
+    if (record.author) updateField('author', record.author);
+    if (record.date) updateField('survey_date', record.date);
 
-    // Ensure birth_month and birth_day are always exactly 2 digits if they exist
-    const paddedMonth = record.birth_month ? String(record.birth_month).padStart(2, '0') : '01';
-    const paddedDay = record.birth_day ? String(record.birth_day).padStart(2, '0') : '01';
-    updateField('birth_month', paddedMonth);
-    updateField('birth_day', paddedDay);
-
-    // Set Region and Agency directly
+    // 2. Set Region and Agency (region must come before agency)
     if (record.region || recordRegion) {
       updateField('region', record.region || recordRegion);
     }
     updateField('agency', record.agency);
+
+    // 3. Set personal info
+    updateField('name', record.name);
+    updateField('gender', record.gender);
+    updateField('birth_year', record.birth_year);
+
+    const paddedMonth = record.birth_month ? String(record.birth_month).padStart(2, '0') : '01';
+    const paddedDay = record.birth_day ? String(record.birth_day).padStart(2, '0') : '01';
+    updateField('birth_month', paddedMonth);
+    updateField('birth_day', paddedDay);
 
     updateField('service_type', record.service_type || '일반 서비스');
     updateField('satisfaction', record.satisfaction);
@@ -605,6 +608,7 @@ ${formData.interviewer_opinion || '(작성되지 않음)'}`;
     return {
       id: Date.now() + index,
       rowNumber: Number(row.rowNumber), // Ensure number type
+      author: row.Author,
       name: row.Name,
       gender: row.Gender,
       birth_year: row.Birth_Year,

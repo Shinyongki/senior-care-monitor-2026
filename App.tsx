@@ -37,7 +37,7 @@ const App: React.FC = () => {
 
   // Persisted Data
   // 하드코딩된 기본 Google Apps Script URL (항상 동일한 시트 사용)
-  const DEFAULT_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwaXEaMirgo4NcyhjCYtm7wZaiRsBf6C_Ejcn1GHKsX6VG8bOL5shcsGuUsGSL2GnBR8g/exec';
+  const DEFAULT_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwhoSekll2fhf319bbzXQ_A3jkeatZ3JkMy7zstFdM1EH5sCT-qMn-VW49AGLLaIT3jgw/exec';
   const [scriptUrl, setScriptUrl] = useState<string>(() => localStorage.getItem('googleSheetUrl') || DEFAULT_SCRIPT_URL);
 
   const [hypotheses, setHypotheses] = useState<Hypothesis[]>(() => {

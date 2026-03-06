@@ -962,6 +962,7 @@ ${formData.interviewer_opinion || '(작성되지 않음)'}`;
               riskTargets={riskTargets}
               setRiskTargets={setRiskTargets}
               showToast={showToast}
+              scriptUrl={scriptUrl}
             />
           )}
 

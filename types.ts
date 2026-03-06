@@ -15,6 +15,8 @@ export interface RiskTarget {
   service_type?: ServiceType; // Ensure this is available
   riskDetails: string;
   date: string;
+  address?: string;
+  phone?: string;
   // Pre-filled Visit Data
   env_check?: string[];
   safety_check?: string[];

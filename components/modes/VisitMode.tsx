@@ -1,9 +1,10 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Card } from '../ui/Card';
 import { FormDataState, Hypothesis, ServiceType, RiskTarget } from '../../types';
 import { RISK_FACTORS, OUTCOMES, VISIT_INDICATORS, REGION_AGENCY_MAP, SERVICE_HYPOTHESIS_MAPPING } from '../../constants';
-import { AlertTriangle, Lightbulb, CheckCircle2, Activity, Globe, UserPlus, HelpCircle, ArrowRight, Trash2, Edit, PlusCircle, X, Save, Users } from 'lucide-react';
+import { AlertTriangle, Lightbulb, CheckCircle2, Activity, Globe, UserPlus, HelpCircle, ArrowRight, Trash2, Edit, PlusCircle, X, Save, Users, Download, Search, Loader2, Eye } from 'lucide-react';
+import { fetchSheetData } from '../../utils/googleSheetApi';
 
 interface VisitModeProps {
   formData: FormDataState;
@@ -13,10 +14,11 @@ interface VisitModeProps {
   riskTargets?: RiskTarget[];
   setRiskTargets?: React.Dispatch<React.SetStateAction<RiskTarget[]>>;
   showToast: (msg: string, type?: 'success' | 'error' | 'info') => void;
+  scriptUrl?: string;
 }
 
 const VisitMode: React.FC<VisitModeProps> = ({
-  formData, updateField, hypotheses, setHypotheses, riskTargets = [], setRiskTargets, showToast
+  formData, updateField, hypotheses, setHypotheses, riskTargets = [], setRiskTargets, showToast, scriptUrl
 }) => {
   // State for CRUD
   const [showTargetList, setShowTargetList] = useState(false);
@@ -24,6 +26,287 @@ const VisitMode: React.FC<VisitModeProps> = ({
   const [isCreating, setIsCreating] = useState(false);
   // New state to track selected question from the mapping
   const [selectedMappingId, setSelectedMappingId] = useState<number | null>(null);
+
+  // Auto-load risk targets from sheet on mount
+  const hasAutoLoaded = useRef(false);
+  useEffect(() => {
+    if (!scriptUrl || !setRiskTargets || hasAutoLoaded.current) return;
+    hasAutoLoaded.current = true;
+
+    (async () => {
+      try {
+        const response = await fetchSheetData(scriptUrl);
+        if (!response.success || !response.data) return;
+
+        const flaggedRows = response.data.filter((row: any) =>
+          row.Is_RiskTarget && String(row.Is_RiskTarget).trim()
+        );
+        if (flaggedRows.length === 0) return;
+
+        // Group by name+agency, take latest per person
+        const groups: Record<string, any[]> = {};
+        flaggedRows.forEach((row: any) => {
+          const key = `${row.Name}__${row.Agency}`;
+          if (!groups[key]) groups[key] = [];
+          groups[key].push(row);
+        });
+
+        const newTargets: RiskTarget[] = [];
+        Object.values(groups).forEach(rows => {
+          const sorted = [...rows].sort((a, b) =>
+            String(b.Survey_Date || b.Timestamp || '').localeCompare(String(a.Survey_Date || a.Timestamp || ''))
+          );
+          const latest = sorted[0];
+          const alreadyExists = riskTargets.some(t => t.name === latest.Name && t.agency === latest.Agency);
+          if (!alreadyExists) {
+            newTargets.push({
+              id: Date.now() + Math.random(),
+              name: latest.Name || '',
+              gender: latest.Gender || '여',
+              birth_year: latest.Birth_Year || '',
+              agency: latest.Agency || '',
+              service_type: (latest.Service_Type as ServiceType) || '일반 서비스',
+              riskDetails: '시트 1차대면등록 자동 등록',
+              date: new Date().toISOString().split('T')[0],
+              address: '',
+              phone: ''
+            });
+          }
+        });
+
+        if (newTargets.length > 0) {
+          setRiskTargets(prev => [...prev, ...newTargets]);
+          showToast(`시트에서 리스크 대상자 ${newTargets.length}명이 자동 등록되었습니다.`, 'success');
+        }
+      } catch (error) {
+        console.error('Auto-load risk targets error:', error);
+      }
+    })();
+  }, [scriptUrl]);
+
+  // Google Sheet search & summary states
+  const [showSheetSearch, setShowSheetSearch] = useState(false);
+  const [sheetSearchQuery, setSheetSearchQuery] = useState('');
+  const [isLoadingSheet, setIsLoadingSheet] = useState(false);
+  const [subjectSummary, setSubjectSummary] = useState<{
+    name: string;
+    gender: string;
+    birthYear: string;
+    birthMonth: string;
+    birthDay: string;
+    ageGroup: string;
+    region: string;
+    agency: string;
+    serviceType: string;
+    totalRecords: number;
+    latestDate: string;
+    latestAuthor: string;
+    latestSatisfaction: string;
+    serviceItems: string;
+    visitFreq: string;
+    callFreq: string;
+    riskSummaries: string[];
+    specialNotes: string[];
+    indicators: Record<string, string>;
+    agencyResponses: string[];
+    isRiskTarget: boolean;
+    address: string;
+    phone: string;
+  } | null>(null);
+  const [searchResults, setSearchResults] = useState<{ name: string; agency: string; region: string; count: number }[]>([]);
+
+  const handleSearchSheet = async () => {
+    if (!scriptUrl) {
+      showToast('구글 시트 연동 URL이 설정되지 않았습니다. 설정에서 URL을 입력해주세요.', 'error');
+      return;
+    }
+    if (!sheetSearchQuery.trim()) {
+      showToast('검색어를 입력해주세요.', 'error');
+      return;
+    }
+    setIsLoadingSheet(true);
+    setSubjectSummary(null);
+    setSearchResults([]);
+    try {
+      const response = await fetchSheetData(scriptUrl);
+      if (response.success && response.data) {
+        const q = sheetSearchQuery.trim().toLowerCase();
+        const matched = response.data.filter((row: any) =>
+          (row.Name || '').toLowerCase().includes(q) ||
+          (row.Agency || '').toLowerCase().includes(q)
+        );
+
+        if (matched.length === 0) {
+          showToast('검색 결과가 없습니다.', 'info');
+          return;
+        }
+
+        // Group by unique name+agency combinations
+        const groups: Record<string, any[]> = {};
+        matched.forEach((row: any) => {
+          const key = `${row.Name}__${row.Agency}`;
+          if (!groups[key]) groups[key] = [];
+          groups[key].push(row);
+        });
+
+        const groupKeys = Object.keys(groups);
+        if (groupKeys.length === 1) {
+          // Single match -> show summary directly
+          buildSummary(groups[groupKeys[0]]);
+        } else {
+          // Multiple matches -> show selection list
+          setSearchResults(groupKeys.map(key => {
+            const rows = groups[key];
+            return {
+              name: rows[0].Name || '-',
+              agency: rows[0].Agency || '-',
+              region: rows[0].Region || '-',
+              count: rows.length
+            };
+          }));
+          showToast(`${groupKeys.length}명의 대상자가 검색되었습니다. 선택해주세요.`, 'info');
+        }
+      } else {
+        showToast(response.message || '데이터를 불러오는데 실패했습니다.', 'error');
+      }
+    } catch (error) {
+      showToast('구글 시트 데이터 로딩 중 오류가 발생했습니다.', 'error');
+    } finally {
+      setIsLoadingSheet(false);
+    }
+  };
+
+  const handleSelectFromResults = async (name: string, agency: string) => {
+    setIsLoadingSheet(true);
+    try {
+      const response = await fetchSheetData(scriptUrl!);
+      if (response.success && response.data) {
+        const rows = response.data.filter((row: any) => row.Name === name && row.Agency === agency);
+        if (rows.length > 0) {
+          buildSummary(rows);
+          setSearchResults([]);
+        }
+      }
+    } catch (error) {
+      showToast('데이터 로딩 중 오류가 발생했습니다.', 'error');
+    } finally {
+      setIsLoadingSheet(false);
+    }
+  };
+
+  const buildSummary = (rows: any[]) => {
+    // Sort by date descending to get latest first
+    const sorted = [...rows].sort((a, b) => {
+      const dateA = a.Survey_Date || a.Timestamp || '';
+      const dateB = b.Survey_Date || b.Timestamp || '';
+      return String(dateB).localeCompare(String(dateA));
+    });
+    const latest = sorted[0];
+
+    // Collect unique risk summaries and special notes across all records
+    const riskSummaries = sorted
+      .map(r => r.Phone_Risk_Summary || '')
+      .filter(v => v && v.trim())
+      .filter((v, i, arr) => arr.indexOf(v) === i);
+    const specialNotes = sorted
+      .map(r => r.Phone_Notes || '')
+      .filter(v => v && v.trim())
+      .filter((v, i, arr) => arr.indexOf(v) === i);
+    const agencyResponses = sorted
+      .map(r => r.Agency_Response || '')
+      .filter(v => v && v.trim())
+      .filter((v, i, arr) => arr.indexOf(v) === i);
+
+    // Collect latest indicator values
+    const indicators: Record<string, string> = {};
+    const indicatorKeys = ['Gen_Stability', 'Gen_Loneliness', 'Gen_Safety', 'Hosp_Indep', 'Hosp_Anxiety', 'Hosp_Sat', 'Spec_Emotion', 'Spec_Social', 'Spec_Sat'];
+    const indicatorLabels: Record<string, string> = {
+      'Gen_Stability': '생활안정성', 'Gen_Loneliness': '고독감해소', 'Gen_Safety': '안전망체감도',
+      'Hosp_Indep': '초기안착자립', 'Hosp_Anxiety': '재입원불안해소', 'Hosp_Sat': '가사신체지원만족',
+      'Spec_Emotion': '정서적변화', 'Spec_Social': '사회적관계형성', 'Spec_Sat': '프로그램만족도'
+    };
+    indicatorKeys.forEach(key => {
+      const val = latest[key];
+      if (val && String(val).trim()) {
+        indicators[indicatorLabels[key] || key] = String(val);
+      }
+    });
+
+    setSubjectSummary({
+      name: latest.Name || '',
+      gender: latest.Gender || '',
+      birthYear: latest.Birth_Year || '',
+      birthMonth: latest.Birth_Month || '',
+      birthDay: latest.Birth_Day || '',
+      ageGroup: latest.Age_Group || '',
+      region: latest.Region || '',
+      agency: latest.Agency || '',
+      serviceType: latest.Service_Type || '',
+      totalRecords: rows.length,
+      latestDate: latest.Survey_Date || '',
+      latestAuthor: latest.Author || '',
+      latestSatisfaction: latest.Satisfaction || '',
+      serviceItems: latest.Service_Items || '',
+      visitFreq: latest.Visit_Freq || '',
+      callFreq: latest.Call_Freq || '',
+      riskSummaries,
+      specialNotes,
+      indicators,
+      agencyResponses,
+      isRiskTarget: !!(latest.Is_RiskTarget && String(latest.Is_RiskTarget).trim()),
+      address: '',
+      phone: ''
+    });
+
+    // Auto-register as risk target if '1차대면등록' has any value
+    const hasRiskFlag = !!(latest.Is_RiskTarget && String(latest.Is_RiskTarget).trim());
+    if (hasRiskFlag && setRiskTargets) {
+      const alreadyExists = riskTargets.some(t => t.name === latest.Name && t.agency === latest.Agency);
+      if (!alreadyExists) {
+        const newTarget: RiskTarget = {
+          id: Date.now(),
+          name: latest.Name || '',
+          gender: latest.Gender || '여',
+          birth_year: latest.Birth_Year || '',
+          agency: latest.Agency || '',
+          service_type: (latest.Service_Type as ServiceType) || '일반 서비스',
+          riskDetails: '시트 1차대면등록 자동 등록',
+          date: new Date().toISOString().split('T')[0],
+          address: '',
+          phone: ''
+        };
+        setRiskTargets(prev => [...prev, newTarget]);
+        showToast(`'${latest.Name}' 어르신이 리스크 대상자로 자동 등록되었습니다.`, 'info');
+      }
+    }
+
+    // Auto-populate form fields
+    updateField('name', latest.Name || '');
+    updateField('agency', latest.Agency || '');
+    updateField('gender', latest.Gender || '여');
+    updateField('birth_year', latest.Birth_Year || '');
+    if (latest.Birth_Month) updateField('birth_month', latest.Birth_Month);
+    if (latest.Birth_Day) updateField('birth_day', latest.Birth_Day);
+    if (latest.Service_Type) updateField('service_type', latest.Service_Type);
+    if (latest.Region) {
+      updateField('region', latest.Region);
+    } else {
+      const region = Object.keys(REGION_AGENCY_MAP).find(r =>
+        REGION_AGENCY_MAP[r].includes(latest.Agency || '')
+      );
+      if (region) updateField('region', region);
+    }
+
+    showToast(`'${latest.Name}' 어르신의 요약 정보를 불러왔습니다.`, 'success');
+  };
+
+  const formatKoreanDate = (dateStr: string): string => {
+    if (!dateStr) return '-';
+    const d = new Date(dateStr);
+    if (isNaN(d.getTime())) return dateStr;
+    const days = ['일요일', '월요일', '화요일', '수요일', '목요일', '금요일', '토요일'];
+    return `${days[d.getDay()]} ${d.getMonth() + 1}월${d.getDate()}일 ${d.getFullYear()}년`;
+  };
 
   const handleTargetSelect = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const targetId = Number(e.target.value);
@@ -52,6 +335,11 @@ const VisitMode: React.FC<VisitModeProps> = ({
       updateField('visit_indicators', selected.visit_indicators || {});
       updateField('final_grade', selected.final_grade || '');
       updateField('action_memo', selected.action_memo || '');
+
+      // Load address/phone into summary if available
+      if (selected.address || selected.phone) {
+        setSubjectSummary(prev => prev ? { ...prev, address: selected.address || '', phone: selected.phone || '' } : null);
+      }
 
       showToast(`🚩 현장 점검 대상 '${selected.name}' 어르신의 정보를 로드했습니다.`);
     }
@@ -271,6 +559,8 @@ const VisitMode: React.FC<VisitModeProps> = ({
       service_type: formData.service_type,
       riskDetails: formData.action_memo || '현장점검 필요',
       date: new Date().toISOString().split('T')[0],
+      address: subjectSummary?.address || '',
+      phone: subjectSummary?.phone || '',
       env_check: formData.env_check,
       safety_check: formData.safety_check,
       body_status: formData.body_status,
@@ -294,11 +584,47 @@ const VisitMode: React.FC<VisitModeProps> = ({
     setRiskTargets(prev => prev.map(t => t.id === editingTarget.id ? {
       ...t, name: formData.name, gender: formData.gender, birth_year: formData.birth_year,
       agency: formData.agency, service_type: formData.service_type, riskDetails: formData.action_memo || t.riskDetails,
+      address: subjectSummary?.address || t.address, phone: subjectSummary?.phone || t.phone,
       env_check: formData.env_check, safety_check: formData.safety_check, body_status: formData.body_status,
       visit_indicators: formData.visit_indicators, final_grade: formData.final_grade, action_memo: formData.action_memo
     } : t));
     showToast('✅ 수정 완료', 'success');
     setEditingTarget(null);
+  };
+
+  // Lookup a risk target's full info from sheet and show summary
+  const handleLookupTarget = async (target: RiskTarget) => {
+    if (!scriptUrl) {
+      showToast('구글 시트 연동 URL이 설정되지 않았습니다.', 'error');
+      return;
+    }
+    setShowSheetSearch(true);
+    setIsLoadingSheet(true);
+    setSubjectSummary(null);
+    setSearchResults([]);
+    try {
+      const response = await fetchSheetData(scriptUrl);
+      if (response.success && response.data) {
+        const rows = response.data.filter((row: any) =>
+          row.Name === target.name && row.Agency === target.agency
+        );
+        if (rows.length > 0) {
+          buildSummary(rows);
+          // Restore saved address/phone from local risk target
+          setSubjectSummary(prev => prev ? {
+            ...prev,
+            address: target.address || prev.address,
+            phone: target.phone || prev.phone
+          } : prev);
+        } else {
+          showToast(`'${target.name}' 어르신의 시트 기록을 찾을 수 없습니다.`, 'info');
+        }
+      }
+    } catch (error) {
+      showToast('데이터 조회 중 오류가 발생했습니다.', 'error');
+    } finally {
+      setIsLoadingSheet(false);
+    }
   };
 
   const startEditing = (target: RiskTarget) => {
@@ -331,6 +657,13 @@ const VisitMode: React.FC<VisitModeProps> = ({
             <button onClick={() => setShowTargetList(!showTargetList)} className="px-3 py-1.5 bg-white/20 hover:bg-white/30 rounded-lg text-sm">
               {showTargetList ? '접기' : '목록'}
             </button>
+            <button
+              onClick={() => setShowSheetSearch(!showSheetSearch)}
+              className="px-3 py-1.5 bg-amber-400 hover:bg-amber-500 text-amber-900 rounded-lg text-sm font-bold flex items-center gap-1 transition-colors"
+            >
+              <Search size={14} />
+              대상자 조회
+            </button>
             {setRiskTargets && (
               <button onClick={() => setIsCreating(true)} className="px-3 py-1.5 bg-white text-red-600 rounded-lg text-sm font-bold flex items-center gap-1">
                 <PlusCircle size={14} /> 등록
@@ -338,6 +671,225 @@ const VisitMode: React.FC<VisitModeProps> = ({
             )}
           </div>
         </div>
+
+        {/* Google Sheet Search & Summary */}
+        {showSheetSearch && (
+          <div className="p-4 border-t border-amber-200 bg-gradient-to-b from-amber-50 to-white">
+            <div className="flex items-center justify-between mb-3">
+              <h4 className="text-sm font-bold text-amber-800 flex items-center gap-2">
+                <Search size={16} /> 구글 시트 대상자 조회
+              </h4>
+              <button onClick={() => { setShowSheetSearch(false); setSheetSearchQuery(''); setSubjectSummary(null); setSearchResults([]); }} className="p-1 text-slate-400 hover:text-slate-600">
+                <X size={18} />
+              </button>
+            </div>
+
+            {/* Search Bar */}
+            <div className="flex gap-2 mb-4">
+              <div className="relative flex-1">
+                <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                <input
+                  type="text"
+                  placeholder="대상자 성명 또는 기관명으로 검색..."
+                  value={sheetSearchQuery}
+                  onChange={(e) => setSheetSearchQuery(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && handleSearchSheet()}
+                  className="w-full pl-9 pr-3 py-2.5 text-sm border border-amber-200 rounded-lg focus:ring-2 focus:ring-amber-500 outline-none bg-white"
+                />
+              </div>
+              <button
+                onClick={handleSearchSheet}
+                disabled={isLoadingSheet}
+                className="px-5 py-2.5 bg-amber-500 hover:bg-amber-600 text-white font-bold rounded-lg text-sm flex items-center gap-1 transition-colors disabled:opacity-50"
+              >
+                {isLoadingSheet ? <Loader2 size={14} className="animate-spin" /> : <Search size={14} />}
+                조회
+              </button>
+            </div>
+
+            {/* Loading */}
+            {isLoadingSheet && (
+              <div className="text-center py-8 text-slate-400 flex items-center justify-center gap-2">
+                <Loader2 size={20} className="animate-spin" /> 구글 시트에서 검색 중...
+              </div>
+            )}
+
+            {/* Multiple Results List */}
+            {searchResults.length > 0 && !isLoadingSheet && (
+              <div className="mb-4">
+                <p className="text-xs text-slate-500 mb-2">여러 대상자가 검색되었습니다. 조회할 대상자를 선택하세요.</p>
+                <div className="space-y-1">
+                  {searchResults.map((r, idx) => (
+                    <button
+                      key={idx}
+                      onClick={() => handleSelectFromResults(r.name, r.agency)}
+                      className="w-full text-left p-3 bg-white rounded-lg border border-slate-200 hover:border-amber-400 hover:bg-amber-50 transition-all flex items-center justify-between"
+                    >
+                      <div className="flex items-center gap-3">
+                        <span className="font-bold text-slate-800">{r.name}</span>
+                        <span className="text-xs text-slate-500">{r.region} / {r.agency}</span>
+                      </div>
+                      <span className="text-xs text-amber-600 font-bold">{r.count}건 기록</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Summary Card */}
+            {subjectSummary && !isLoadingSheet && (
+              <div className="space-y-4 animate-fade-in">
+                {/* Header */}
+                <div className="flex items-center justify-between bg-white rounded-xl p-4 border border-slate-200 shadow-sm">
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 bg-gradient-to-br from-amber-400 to-orange-500 rounded-full flex items-center justify-center text-white font-bold text-lg shadow">
+                      {subjectSummary.name.charAt(0)}
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-lg font-bold text-slate-800">{subjectSummary.name}</span>
+                        <span className="text-sm text-slate-500">({subjectSummary.gender}, {subjectSummary.ageGroup || subjectSummary.birthYear + '년생'})</span>
+                        {subjectSummary.isRiskTarget && (
+                          <span className="px-2 py-0.5 bg-red-100 text-red-700 text-xs font-bold rounded">리스크 등록</span>
+                        )}
+                      </div>
+                      <div className="text-sm text-slate-500 mt-0.5">
+                        {subjectSummary.region} · {subjectSummary.agency} · {subjectSummary.serviceType}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* 주소 / 전화번호 */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 bg-white rounded-xl p-4 border border-slate-200 shadow-sm">
+                  <div>
+                    <label className="block text-xs font-bold text-slate-500 mb-1">주소</label>
+                    <input
+                      type="text"
+                      placeholder="방문 주소를 입력하세요"
+                      value={subjectSummary.address}
+                      onChange={(e) => setSubjectSummary(prev => prev ? { ...prev, address: e.target.value } : prev)}
+                      className="w-full p-2.5 text-sm bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-amber-500 outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-slate-500 mb-1">전화번호</label>
+                    <input
+                      type="tel"
+                      placeholder="연락처를 입력하세요"
+                      value={subjectSummary.phone}
+                      onChange={(e) => setSubjectSummary(prev => prev ? { ...prev, phone: e.target.value } : prev)}
+                      className="w-full p-2.5 text-sm bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-amber-500 outline-none"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {/* 모니터링 이력 */}
+                  <div className="bg-white rounded-xl p-4 border border-slate-200">
+                    <h5 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">모니터링 이력</h5>
+                    <div className="space-y-2">
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm text-slate-600">총 모니터링 횟수</span>
+                        <span className="font-bold text-amber-600">{subjectSummary.totalRecords}회</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm text-slate-600">최근 조사일</span>
+                        <span className="font-medium text-slate-800">{formatKoreanDate(subjectSummary.latestDate)}</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm text-slate-600">담당자</span>
+                        <span className="font-medium text-slate-800">{subjectSummary.latestAuthor || '-'}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* 서비스 현황 */}
+                  <div className="bg-white rounded-xl p-4 border border-slate-200">
+                    <h5 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">서비스 현황</h5>
+                    <div className="space-y-2">
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm text-slate-600">만족도</span>
+                        <span className="font-medium text-slate-800">{subjectSummary.latestSatisfaction || '-'}</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm text-slate-600">방문 빈도</span>
+                        <span className="font-medium text-slate-800">{subjectSummary.visitFreq || '-'}</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm text-slate-600">전화 빈도</span>
+                        <span className="font-medium text-slate-800">{subjectSummary.callFreq || '-'}</span>
+                      </div>
+                      {subjectSummary.serviceItems && (
+                        <div className="pt-1 border-t border-slate-100">
+                          <span className="text-xs text-slate-500">서비스 항목: </span>
+                          <span className="text-xs text-slate-700">{subjectSummary.serviceItems}</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* 위험 신호 */}
+                  <div className="bg-white rounded-xl p-4 border border-red-100">
+                    <h5 className="text-xs font-bold text-red-400 uppercase tracking-wider mb-3 flex items-center gap-1">
+                      <AlertTriangle size={12} /> 위험 신호
+                    </h5>
+                    {subjectSummary.riskSummaries.length > 0 ? (
+                      <div className="space-y-1.5">
+                        {subjectSummary.riskSummaries.map((r, i) => (
+                          <div key={i} className="text-sm text-red-700 bg-red-50 p-2 rounded-lg border border-red-100">{r}</div>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-sm text-slate-400">기록된 위험 신호 없음</p>
+                    )}
+                    {subjectSummary.specialNotes.length > 0 && (
+                      <div className="mt-3 pt-3 border-t border-slate-100">
+                        <span className="text-xs font-bold text-slate-400">특이사항</span>
+                        {subjectSummary.specialNotes.map((n, i) => (
+                          <div key={i} className="text-sm text-slate-600 bg-slate-50 p-2 rounded-lg mt-1">{n}</div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* 유선 지표 결과 */}
+                  <div className="bg-white rounded-xl p-4 border border-slate-200">
+                    <h5 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">최근 유선 지표</h5>
+                    {Object.keys(subjectSummary.indicators).length > 0 ? (
+                      <div className="space-y-1.5">
+                        {Object.entries(subjectSummary.indicators).map(([label, value]) => (
+                          <div key={label} className="flex justify-between items-center">
+                            <span className="text-xs text-slate-500">{label}</span>
+                            <span className={`text-xs font-bold px-2 py-0.5 rounded ${
+                              String(value).match(/위기|위험|심각|단절|시급|긴급/) ? 'bg-red-100 text-red-700' :
+                              String(value).match(/주의|부족|미흡|심화/) ? 'bg-orange-100 text-orange-700' :
+                              'bg-green-50 text-green-700'
+                            }`}>{value}</span>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-sm text-slate-400">기록된 지표 없음</p>
+                    )}
+                  </div>
+                </div>
+
+                {/* 기관 소통 이력 */}
+                {subjectSummary.agencyResponses.length > 0 && (
+                  <div className="bg-white rounded-xl p-4 border border-blue-100">
+                    <h5 className="text-xs font-bold text-blue-400 uppercase tracking-wider mb-3">수행기관 답변 이력</h5>
+                    {subjectSummary.agencyResponses.map((r, i) => (
+                      <div key={i} className="text-sm text-blue-700 bg-blue-50 p-2 rounded-lg border border-blue-100 mb-1">{r}</div>
+                    ))}
+                  </div>
+                )}
+
+                <p className="text-xs text-amber-600 text-center">기본 정보가 자동으로 입력되었습니다. 아래 체크리스트를 진행해주세요.</p>
+              </div>
+            )}
+          </div>
+        )}
 
         {showTargetList && (
           <div className="p-4 overflow-x-auto">
@@ -355,8 +907,9 @@ const VisitMode: React.FC<VisitModeProps> = ({
                       <td className="p-2 text-slate-600">{t.agency}</td>
                       <td className="p-2"><span className={`px-2 py-0.5 rounded text-xs font-bold ${t.final_grade === '위기' ? 'bg-red-100 text-red-700' : t.final_grade === '주의' ? 'bg-orange-100 text-orange-700' : 'bg-slate-100'}`}>{t.final_grade || '-'}</span></td>
                       <td className="p-2 flex justify-center gap-1">
-                        <button onClick={() => startEditing(t)} className="p-1 bg-blue-100 text-blue-600 rounded"><Edit size={14} /></button>
-                        {setRiskTargets && <button onClick={() => handleDeleteTarget(t.id)} className="p-1 bg-red-100 text-red-600 rounded"><Trash2 size={14} /></button>}
+                        <button onClick={() => handleLookupTarget(t)} className="p-1 bg-amber-100 text-amber-600 rounded" title="조회"><Eye size={14} /></button>
+                        <button onClick={() => startEditing(t)} className="p-1 bg-blue-100 text-blue-600 rounded" title="수정"><Edit size={14} /></button>
+                        {setRiskTargets && <button onClick={() => handleDeleteTarget(t.id)} className="p-1 bg-red-100 text-red-600 rounded" title="삭제"><Trash2 size={14} /></button>}
                       </td>
                     </tr>
                   ))}
